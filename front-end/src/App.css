@@ -1,0 +1,58 @@
+.App {
+  text-align: center;
+}
+.LandingPage-background{
+    overflow-y: hidden;
+    overflow-x: hidden;
+    height: 100%;
+    height:100hv;
+    background-size: cover;
+    background-image: url('https://a1.r9cdn.net/dimg/phoenix-images/v1/phoenix-flights-bg.jpg');
+
+}
+.border-left {
+    border-left: 1px solid #E4E5EA;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.Text-Area {
+    width: 20% !important;
+    margin: 60px auto !important;
+    background-color: white !important;
+    border: 10px solid #ffffff !important;
+    font-weight: 900 ;
+  }
+  .popup {
+      border: 1px solid #FF5722 !important;
+    }
+
+  .Tab-area-bg {
+      backgroundColor: #E4E5EA
+    }
+
+    .Admin-userSearch {
+        width: 20% !important;
+        margin: 10px auto !important;
+        background-color: white !important;
+        font-weight: 400 ;
+      }
+      .Text-bold {
+          font-weight: 900 ;
+        }
+        .Text-big{
+            font-size: large ;
+          }
