@@ -1,15 +1,13 @@
-var mongo = require("./mongo");
-var mongoURL = "mongodb://localhost:27017/KAYAK";
+var MongoConPool=require("./MongoConPool");
+
 function handle_request(msg, callback){
     var res = {};
     try {
-        console.log("In handle request:"+ JSON.stringify(msg));
-        mongo.connect(mongoURL, function(){
-            console.log('Connected to mongo at: ' + mongoURL);
-            var coll = mongo.collection('FlightListings');
-            console.log('-------------------------------------------')
-            console.log(msg.placefrom);
-            coll.find({Origin: msg.placefrom,Destination:msg.placeto,DepartureDate:{$gte:msg.departdate},ArrivalDate:{$lt:msg.arrivaldate}}).toArray( function(err, flight){
+           console.log(msg.placefrom);
+   var queryJson={Origin: msg.placefrom,Destination:msg.placeto/*,DepartureDate:{$gte:msg.departdate},ArrivalDate:{$lt:msg.arrivaldate}*/};
+//        var queryJson={Origin: msg.placefrom,Destination:msg.placeto};
+
+MongoConPool.find('FlightListings',queryJson,function(err, flight){
                 // In case of any error return
      console.log('------------------');
                 console.log(flight.length);
@@ -19,7 +17,6 @@ function handle_request(msg, callback){
                     res.value = "Flights not available";
                     callback(null, res);
                 }
-
                 if (flight.length>0) {
 
                     res.code = "204";
@@ -32,8 +29,6 @@ function handle_request(msg, callback){
                 }
             });
 
-
-        });
     }
     catch (e){
         res.code = "401";
