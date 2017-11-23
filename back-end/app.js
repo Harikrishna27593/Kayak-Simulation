@@ -28,7 +28,7 @@ app.use(logger('dev'));
 var corsOptions = {
     origin: 'http://localhost:3000',
     credentials: true,
-}
+};
 app.use(cors(corsOptions))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -47,9 +47,9 @@ app.use(expressSessions({
     })
 }));
 app.use(passport.initialize());
-
 app.use('/', routes);
 app.use('/users', users);
+
 
 app.post('/logout', function(req,res) {
     console.log(req.session.user);
@@ -69,9 +69,10 @@ app.post('/login', function(req, res) {
         }
         else{
         req.session.user = user.username;
+        console.log(user);
         console.log(req.session.user);
         console.log("session initilized");
-        return res.json({ username:user.username,password:user.password,firstname:user.firstname,lastname:user.lastname,statusCode:"201"});
+        return res.status(201).send();
       }
     })(req, res);
 });
@@ -348,10 +349,58 @@ app.post('/AddFlightListing',function(req, res) {
     });
 });
 
+app.post('/AddCarListing',function(req, res) {
+
+    var CarT=req.body.CarPlace;
+    var carSmall=CarT.substr(1).toLowerCase();
+    var carPlace=CarT.charAt(0).toUpperCase()+carSmall;
+
+
+    var from=new Date(req.body.carsDatePickUp);
+    var to=new Date(req.body.carsDateDropOff);
+
+    var fmonth=from.getMonth()+1;
+    var tomonth=to.getMonth()+1;
+    if(fmonth<10)
+    {
+        fmonth='0'+fmonth;
+    }
+    if(tomonth<10)
+    {
+        tomonth='0'+tomonth;
+    }
+    var fdate=from.getDate();
+    if(from.getDate()<10)
+    {
+        fdate='0'+fdate;
+    }
+    var todate=to.getDate();
+    if(to.getDate()<10)
+    {
+        todate='0'+todate;
+    }
+    var carsDatePickUp=from.getFullYear()+'-'+fmonth+'-'+fdate;
+    var carsDateDropOff=to.getFullYear()+'-'+tomonth+'-'+todate;
+    kafka.make_request('AddCarListing_topic',{"CarId":req.body.CarId,"CarType":req.body.CarType,"CarPlace":carPlace,"carsDatePickUp":carsDatePickUp,"carsDateDropOff":carsDateDropOff,"CarPrice":req.body.CarPrice,"CarPeople":req.body.CarPeople,"CarDoors":req.body.CarDoors,"CarBags":req.body.CarBags}, function(err,results){
+        console.log('---------------');
+        console.log(results);
+        console.log('---------------');
+        if(err){
+            res.status(401).send();
+        }
+        else
+        {
+            if(results.code == 201){
+                return res.status(204).send();
+            }
+            else {
+                res.status(401).send();
+            }
+        }
+    });
+});
 
 app.post('/addHotelListing',function (req,res) {
-  console.log("IN ADD LISTING TO HOTEL ");
-
    var hoteldetails=req.body;
   console.log(hoteldetails);
     kafka.make_request('addHotelListing',hoteldetails,function (err,results) {
@@ -487,10 +536,29 @@ app.get('/GetListingDetails',function(req, res) {
     });
 });
 
+app.get('/GetPageStats',function(req, res) {
+    kafka.make_request('GetPageStats_topic',{"User":req.session.user}, function(err,results){
+        console.log('in result');
+        console.log(results.code);
+        if(err){
+            res.status(401).send();
+        }
+        else
+        {
+            if(results.code == 200){
+                console.log(results.arr);
+                return res.status(200).send(results.arr);
+            }
+            else {
+                res.status(401).send();
+            }
+        }
+    });
+});
+
 
 app.post('/signup', function(req, res) {
   //console.log("signup req: "+req.body.username+req.bodyfirstname);
-
   kafka.make_request('signuptopic',{  "username":req.body.username,"password":req.body.password,"firstname":req.body.firstname,"lastname":req.body.lastname}, function(err,results){
       console.log('in result - signup strategy - passport.js');
       console.log("results code - in signup strayegy: "+results.code);
@@ -498,7 +566,7 @@ app.post('/signup', function(req, res) {
           done(err,{});
       }
       else {
-        if(results.code === 201){
+        if(results.code === 200){
                   res.status(201).send();
           }
           else if(results.code === 401){

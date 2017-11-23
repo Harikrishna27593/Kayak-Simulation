@@ -15,7 +15,7 @@ module.exports = function(passport) {
             else
             {
                 if(results.code == 200){
-                    done(null,{username:results.username,password:results.password,firstname:results.firstname,lastname:results.lastname});
+                    done(null,{username:results.username});
                 }
                 else {
                     console.log("passport.js - no user fetched");
