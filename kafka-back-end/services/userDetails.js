@@ -1,18 +1,13 @@
-var mongo = require("./mongo");
-var mongoURL = "mongodb://localhost:27017/KAYAK";
+var MongoConPool=require("./MongoConPool");
 function userdetails(msg, callback){
-
     var res = {};
     console.log("In handle request:"+ JSON.stringify(msg));
-    mongo.connect(mongoURL, function(){
-
-        var coll = mongo.collection('Users');
-        coll.find().limit(50).toArray( function(err, hotel){
+        var queryJson={$or:[{Email:msg.username},{FirstName:msg.firstname},{LastName:msg.lastname}]};
+        MongoConPool.find('Users',queryJson,function(err, hotel){
             res=hotel;
-console.log(res.length);
+          console.log(res.length);
             callback(null, res);
         });
-    });
 }
 
 exports.userdetails = userdetails;
