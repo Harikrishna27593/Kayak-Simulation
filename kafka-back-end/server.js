@@ -11,6 +11,11 @@ var FlightSearch = require('./services/FlightSearch');
 var AddFlightListing = require('./services/AddFlightListing');
 var CheckListingIdExists=require('./services/CheckListingIdExists');
 var GetListingDetails=require('./services/GetListingDetails');
+var SqlConPool=require('./services/SqlConPool');
+var AddCarListing = require('./services/AddCarListing');
+var GetPageStats = require('./services/GetPageStats');
+
+//var bcrypt = require('bcrypt');
 
 var topic_name_1 = 'login_topic';
 var consumer1 = connection.getConsumer(topic_name_1);
@@ -51,55 +56,107 @@ var consumer12=connection.getConsumer(topic_name_12);
 var topic_name_13='GetListingDetails_topic';
 var consumer13=connection.getConsumer(topic_name_13);
 
+var topic_name_14='AddCarListing_topic';
+var consumer14=connection.getConsumer(topic_name_14);
+
+var topic_name_15='GetPageStats_topic';
+var consumer15=connection.getConsumer(topic_name_15);
+
 
 var producer = connection.getProducer();
-
 console.log('server is running');
 
-consumer1.on('message', function (message) {
-    console.log('message received consumer1 - server.js');
-    console.log(JSON.stringify(message.value));
-    var data = JSON.parse(message.value);
-    login.handle_request(data.data, function(err,res){
-        console.log('after handle in server.js '+ res.value);
-        var payloads = [
-            { topic: data.replyTo,
-                messages:JSON.stringify({
-                    correlationId:data.correlationId,
-                    data : res
-                }),
-                partition : 0
-            }
-        ];
-        producer.send(payloads, function(err, data){
-            console.log(data);
-        });
-        return;
-    });
-});
-
-consumer2.on('message', function (message) {
-    console.log('message received in consumer2 - server.js');
-    console.log(JSON.stringify(message.value));
-    var data = JSON.parse(message.value);
-    signup.handle_request(data.data, function(err,res){
-        console.log('after handle in server.js '+ res.value);
-        var payloads = [
-            { topic: data.replyTo,
-                messages:JSON.stringify({
-                    correlationId:data.correlationId,
-                    data : res
-                }),
-                partition : 0
-            }
-        ];
-        producer2.send(payloads, function(err, data){
-            console.log(data);
-        });
-        return;
-    });
-});
-
+// consumer1.on('message', function (message) {
+//     console.log('message received consumer 1 - server.js');
+//     console.log(JSON.stringify(message.value));
+//     var data = JSON.parse(message.value);
+// //console.log(data.data.username);
+// var query="select username,password from KayakUsers where username='"+data.data.username+"'";
+// SqlConPool.handle_request(query,function (result,error) {
+// var res={};
+//         if(result.length===1)
+//   {
+//       console.log(result);
+//       JsonString=JSON.stringify(result);
+//       JSONParse=JSON.parse(JsonString);
+//       console.log(JSONParse[0].username);
+//       bcrypt.compare(data.data.password,JSONParse[0].password,function (err,output) {
+//          if(output===true)
+//          {
+//              res.code="200";
+//              res.username = JSONParse[0].username;
+//          }
+//          else
+//          {
+//              res.code="400";
+//          }
+//       });
+//   }
+//   else
+// {
+//    res.code="400";
+// }
+//     console.log('after handle in server.js '+ res.code);
+//     var payloads = [
+//         { topic: data.replyTo,
+//             messages:JSON.stringify({
+//                 correlationId:data.correlationId,
+//                 data : res
+//             }),
+//             partition : 0
+//         }
+//     ];
+//     producer.send(payloads, function(err, data){
+//         console.log(data);
+//        });
+//     });
+// });
+//
+// consumer2.on('message', function (message) {
+//     console.log('message received in consumer2 - server.js');
+//     console.log(JSON.stringify(message.value));
+//     var data = JSON.parse(message.value);
+//     let saltRounds=10;
+// //should use hashsync
+//     //newpass will be my newencrypted password
+//     let newpass=bcrypt.hashSync(data.data.password, saltRounds, function(err, hash) {
+//         // Store hash in your password DB.
+//     });
+//
+//     var query="select username from KayakUsers where username='"+data.data.username+"'";
+//     SqlConPool.handle_request(query,function (result,error) {
+//         var res={};
+//         if(result.length>0)
+//         {
+//            res.code="400";
+//         }
+//         else
+//         {
+//             query="insert into KayakUsers (username,password) values('"+data.data.username+"','"+newpass+"')";
+//             res.code="200";
+//         }
+//         console.log('after handle in server.js '+ res.code);
+//         var payloads = [
+//             { topic: data.replyTo,
+//                 messages:JSON.stringify({
+//                     correlationId:data.correlationId,
+//                     data : res
+//                 }),
+//                 partition : 0
+//             }
+//         ];
+//         producer.send(payloads, function(err, data){
+//             console.log(data);
+//         });
+//     });
+//
+//
+//
+//
+//
+//
+//
+// });
 
 
 consumer3.on('message', function (message) {
@@ -354,6 +411,49 @@ consumer13.on('message', function (message) {
 });
 
 
+consumer14.on('message', function (message) {
+    console.log('message received in consumer14 - server.js');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    AddCarListing.handle_request(data.data, function(err,res){
+        console.log('after handle in server.js '+ res.value);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+consumer15.on('message', function (message) {
+    console.log('message received in consumer15 - server.js');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    GetPageStats.handle_request(data.data, function(err,res){
+        console.log('after handle in server.js '+ res.value);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
 
 
 
