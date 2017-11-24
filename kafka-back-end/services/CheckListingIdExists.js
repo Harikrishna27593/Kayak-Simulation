@@ -10,7 +10,7 @@ function handle_request(msg, callback){
                 case 'Hotel':
                     var coll = mongo.collection('HotelListings');
 
-                    coll.findOne({HotelId: msg.ID}).toArray( function(err, Listing){
+                    coll.find({hotelId: msg.ID}).toArray( function(err, Listing){
                         if (err) {
                             res.code = "401";
                             res.value = "Listing not available";
@@ -32,7 +32,7 @@ function handle_request(msg, callback){
                 case 'Flight':
                     var coll = mongo.collection('FlightListings');
 
-                    coll.findOne({FlightID: msg.ID}).toArray( function(err, Listing){
+                    coll.find({FlightId: msg.ID}).toArray( function(err, Listing){
                         if (err) {
                             res.code = "401";
                             res.value = "Listing not available";
@@ -55,7 +55,7 @@ function handle_request(msg, callback){
                 case 'Car':
                     var coll = mongo.collection('CarListings');
 
-                    coll.findOne({CarId: msg.ID}).toArray( function(err, Listing){
+                    coll.find({CarId: msg.ID}).toArray( function(err, Listing){
                         if (err) {
                             res.code = "401";
                             res.value = "Listing not available";

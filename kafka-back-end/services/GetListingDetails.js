@@ -10,42 +10,42 @@ function handle_request(msg, callback){
                 case 'Hotel':
                     var coll = mongo.collection('HotelListings');
 
-                    coll.findOne({HotelId: msg.ID}).toArray( function(err,hotels){
+                    coll.find({hotelId: msg.ID}).toArray( function(err,hotels){
                         if (err) {
                             res.code = "401";
                             res.value = "Listing not available";
                             callback(null, res);
                         }
-                        // else {
-                        //     var resArr = [];
-                        //     resArr = hotels.map(function (file) {
-                        //         var hotelsJSON = {};
-                        //         hotelsJSON.id=cars[i].CarId
-                        //         hotelsJSON.carType = cars[i].CarType;
-                        //         hotelsJSON.place = cars[i].Place;
-                        //         // carsJSON.carName=cars[i].CarName;
-                        //         hotelsJSON.peopleCount=cars[i].People;
-                        //         hotelsJSON.bagCount=cars[i].Bags;
-                        //         hotelsJSON.doorCount=cars[i].Doors;
-                        //         hotelsJSON.carPrice=cars[i].Price;
-                        //         // carsJSON.carCompany=cars[i].CarCompany;
-                        //         i=i+1;
-                        //         return hotelsJSON;
-                        //
-                        //     });
-                        //     res.code = "200";
-                        //     res.value = "CarListing Successful";
-                        //     res.arr=resArr
-                        //     console.log(resArr)
-                        //     callback(null, res);
-                        // }
+                        else {
+                            var resArr = [];
+                            i=0;
+                            resArr = hotels.map(function (file) {
+                                var hotelsJSON = {};
+                                hotelsJSON.id=hotels[i].hotelId;
+                                hotelsJSON.name = hotels[i].Name;
+                                hotelsJSON.address = hotels[i].Address;
+                                // carsJSON.carName=cars[i].CarName;
+                                hotelsJSON.city=hotels[i].City;
+                                hotelsJSON.state=hotels[i].State;
+                                hotelsJSON.availability=hotels[i].Availability;
+                                hotelsJSON.ratings=hotels[i].Ratings;
+                                hotelsJSON.reviews=hotels[i].Reviews;
+                                i=i+1;
+                                return hotelsJSON;
+                            });
+                            res.code = "200";
+                            res.value = "HotelListing Successful";
+                            res.arr=resArr;
+                            console.log(resArr);
+                            callback(null, res);
+                        }
                     });
                     break;
 
                 case 'Flight':
                     var coll = mongo.collection('FlightListings');
 
-                    coll.findOne({FlightID: msg.ID}).toArray( function(err, flights){
+                    coll.find({FlightId: msg.ID}).toArray( function(err, flights){
                         if (err) {
                             res.code = "401";
                             res.value = "Listing not available";
@@ -53,7 +53,7 @@ function handle_request(msg, callback){
                         }
 
                         else {
-                            i=0
+                            i=0;
                             var resArr = [];
                             resArr = flights.map(function (file) {
                                 var flightsJSON = {};
@@ -70,8 +70,8 @@ function handle_request(msg, callback){
                             });
                             res.code = "200";
                             res.value = "FlightsListing Successful";
-                            res.arr=resArr
-                            console.log(resArr)
+                            res.arr=resArr;
+                            console.log(resArr);
                             callback(null, res);
                         }
                     });
@@ -81,7 +81,7 @@ function handle_request(msg, callback){
                 case 'Car':
                     var coll = mongo.collection('CarListings');
 
-                    coll.findOne({CarId: msg.ID}).toArray( function(err,cars){
+                    coll.find({CarId: msg.ID}).toArray( function(err,cars){
                         if (err) {
                             res.code = "401";
                             res.value = "Listing not available";
