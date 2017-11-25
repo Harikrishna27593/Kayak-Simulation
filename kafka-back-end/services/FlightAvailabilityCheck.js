@@ -3,8 +3,8 @@ var MongoConPool=require("./MongoConPool");
 function handle_request(msg, callback){
     var res = {};
     try {
-           console.log(msg.placefrom);
-   var queryJson={Origin: msg.placefrom,Destination:msg.placeto/*,DepartureDate:{$gte:msg.departdate},ArrivalDate:{$lt:msg.arrivaldate}*/};
+           console.log(msg);
+   var queryJson={Origin: msg.placefrom,Destination:msg.placeto,DepartureDate:msg.departdate};
 //        var queryJson={Origin: msg.placefrom,Destination:msg.placeto};
 
 MongoConPool.find('FlightListings',queryJson,function(err, flight){

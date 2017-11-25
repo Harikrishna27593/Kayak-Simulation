@@ -1,15 +1,15 @@
 var mongo = require("./mongo");
 var mongoURL = "mongodb://localhost:27017/KAYAK";
 var MongoConPool=require("./MongoConPool");
-// var winston = require('winston');
-// winston.add(winston.transports.File, { filename: './public/LogFiles/KayakAnalysis.json' });
-// winston.remove(winston.transports.Console);
+var winston = require('winston');
+winston.add(winston.transports.File, { filename: './public/LogFiles/KayakAnalysis.json' });
+winston.remove(winston.transports.Console);
 
 function handle_request(msg, callback){
 
-    // winston.remove(winston.transports.File);
-    // winston.add(winston.transports.File, { filename: './public/LogFiles/KayakAnalysis.json' });
-    // winston.log('info', 'Car Page Viewed', { page_name : 'Cars_page'});
+    winston.remove(winston.transports.File);
+    winston.add(winston.transports.File, { filename: './public/LogFiles/KayakAnalysis.json' });
+    winston.log('info', 'Car Page Viewed', { page_name : 'Cars_page'});
 
 
     var res = {};
@@ -41,7 +41,7 @@ function handle_request(msg, callback){
                     res.code = "200";
                     res.value = "CarListing Successful";
                     res.arr=resArr;
-                    console.log(resArr);
+            //        console.log(resArr);
                     callback(null, res);
                 }
             });

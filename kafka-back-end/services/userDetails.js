@@ -1,13 +1,26 @@
-var MongoConPool=require("./MongoConPool");
-function userdetails(msg, callback){
-    var res = {};
-    console.log("In handle request:"+ JSON.stringify(msg));
-        var queryJson={$or:[{Email:msg.username},{FirstName:msg.firstname},{LastName:msg.lastname}]};
-        MongoConPool.find('Users',queryJson,function(err, hotel){
-            res=hotel;
-          console.log(res.length);
+var SqlConPool = require("./SqlConPool");
+function handle_request(msg, callback) {
+    var query = "select username,firstname,lastname,Address,City,State,phoneNumber,creditcard from kayakusers where username='"+msg.username+"'or firstname='"+msg.firstname+"'or lastname='"+msg.lastname+"';";
+    console.log(query)
+    SqlConPool.handle_request(query, function (result, error) {
+        var res = {};
+        if (error) {
+            res.code = "400";
             callback(null, res);
-        });
+        }
+        else {
+
+            if (result.length > 0) {
+                res.code = "200";
+                res.arr=result;
+                callback(null, res);
+            }
+            else {
+                res.code = "400";
+                callback(null, res);
+            }
+        }
+    });
 }
 
-exports.userdetails = userdetails;
+exports.handle_request = handle_request;

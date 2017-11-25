@@ -1,8 +1,8 @@
 var mysql=require('mysql');
-var pool  = mysql   .createPool({
+var pool  = mysql.createPool({
     host     : 'localhost',
     user     : 'root',
-    password : '1623',
+    password : 'hk275',
     database : 'KAYAK',
 });
 
@@ -10,8 +10,11 @@ function handle_request(query,callback)
 {
     pool.getConnection(function (err,connection) {
         connection.query(query,function (err,result) {
+
+            //console.log(err);
             if(!err)
             {
+                console.log("connection");
                 callback(result,null)
             }
             else

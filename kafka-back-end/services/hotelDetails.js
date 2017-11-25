@@ -1,6 +1,6 @@
 var mongo = require("./mongo");
 var mongoURL = "mongodb://localhost:27017/KAYAK";
-//var winston = require('winston');
+var winston = require('winston');
 function hotel_details(msg, callback){
     var res = {};
     console.log("In handle request:"+ JSON.stringify(msg));
@@ -9,7 +9,9 @@ function hotel_details(msg, callback){
         var from=msg.hotelsDateFrom;
         var to=msg.hotelsDateTo;
         var coll = mongo.collection('HotelListings');
-        coll.find({City: msg.City, hotelsDateFrom: {$gte:from},hotelsDateTo: {$lt:to}}).toArray( function(err, hotel)
+        console.log(from);
+        console.log(to);
+        coll.find({City: msg.City, hotelsDateFrom: {$lt:from},hotelsDateTo: {$gte:to}}).toArray( function(err, hotel)
         {
             res=hotel;
             callback(null, res);
@@ -18,9 +20,9 @@ function hotel_details(msg, callback){
 }
 function gethoteldetails(msg, callback){
 
-    // winston.remove(winston.transports.File);
-    // winston.add(winston.transports.File, { filename: './public/LogFiles/KayakAnalysis.json' });
-    // winston.log('info', 'Hotel Page Viewed', { page_name : 'Hotels_page'});
+    winston.remove(winston.transports.File);
+    winston.add(winston.transports.File, { filename: './public/LogFiles/KayakAnalysis.json' });
+    winston.log('info', 'Hotel Page Viewed', { page_name : 'Hotels_page'});
 
     var res = {};
     console.log("In handle request:"+ JSON.stringify(msg));
