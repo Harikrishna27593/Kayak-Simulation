@@ -16,9 +16,7 @@ const styles = {
     marginBottom: 16,
   },
 };
-const color ={
-  color:'#3C7EE2',
-};
+const color ={color:'#3C7EE2',};
 const tabBackground ={
   backgroundColor:fullWhite,
   color:fullWhite,
@@ -35,26 +33,16 @@ class FlightOptions extends Component {
     this.state = {
       value: 'a',
       checked: false,
-      firstSlider: 0,
+      priceSlider: 0,
     };
   }
-  handleFirstSlider = (event, value) => {
-  this.setState({firstSlider: value});
-  console.log(this.state.firstSlider);
+  handlepriceSlider = (event, value) => {
+  this.setState({priceSlider: value});
 };
-
-  updateCheck() {
-      this.setState((oldState) => {
-        return {
-          checked: !oldState.checked,
-        };
-      });
-    }
-  handleChangeTab = (value) => {
-      this.setState({
-        value: value,
-      });
-    };
+priceFilterSearch = () => {
+this.props.filterOption(this.state.priceSlider);
+};
+handleChangeTab = (value) => {this.setState({value: value,});};
     render() {
         return (
             <div className="container-fluid p-2">
@@ -66,38 +54,17 @@ class FlightOptions extends Component {
                   <Tab  label={<span style={color} className='Text-bold'>TOP FILTERS</span>}
                   value="a" >
                     <div style={{backgroundColor: fullWhite}} >
-                    <h3 style={styles.headline} className='Text-bold ml-2'>Departure</h3><hr/>
-                      <Checkbox className="ml-2" className='Text-bold'
-                        label="SUV"
-                        checked={this.state.checked}
-                        onCheck={this.updateCheck.bind(this)}
-                        style={styles.checkbox}
-                      />
-                      <Checkbox className="ml-2" className='Text-bold'
-                        label="Large"
-                        checked={this.state.checked}
-                        onCheck={this.updateCheck.bind(this)}
-                        style={styles.checkbox}
-                      />
-                      <h3 style={styles.headline} className='Text-bold ml-2 pl-2'>Arrival</h3><hr/>
-                        <Checkbox className="ml-2 pl-2" className='Text-bold'
-                          label="SUV"
-                          checked={this.state.checked}
-                          onCheck={this.updateCheck.bind(this)}
-                          style={styles.checkbox}
-                        />
-                        <Checkbox className="ml-2" className='Text-bold'
-                          label="Large"
-                          checked={this.state.checked}
-                          onCheck={this.updateCheck.bind(this)}
-                          style={styles.checkbox}
-                        />
-                        <h3 style={styles.headline} className='Text-bold ml-2 pl-2'>Price</h3><hr/>
-                        <div className="ml-2">${this.state.firstSlider}</div>
-                        <Slider min={0}  max={10000} step={1}
-                        className="mr-2 ml-2 pb-5"
-                        value={this.state.firstSlider}
-                        onChange={this.handleFirstSlider} />
+                        <h3 style={styles.headline} className='Text-bold ml-2 pl-2'>Price</h3>
+                        <hr/>
+                        <div className="ml-2">${this.state.priceSlider}
+                          <button className="btn ml-5 btn-link btn-primary" onClick={this.priceFilterSearch}>GO</button>
+                        </div>
+
+                          <Slider min={0}  max={3000} step={1}
+                            className="mr-2 ml-2 pb-5"
+                            value={this.state.priceSlider}
+                            onChange={this.handlepriceSlider} />
+
                     </div>
 
                   </Tab>
