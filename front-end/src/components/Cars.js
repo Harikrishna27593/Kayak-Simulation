@@ -5,6 +5,11 @@ import CarOptions from "./CarOptions";
 import CarCard from "./CarCard";
 class Cars extends Component {
 
+
+    carPayment=(carPaymentdetails)=>{
+      this.props.carPayment(carPaymentdetails);
+    };
+
     render() {
         return (
             <div className="container-fluid " style={{backgroundColor: '#E4E5EA'}}>
@@ -18,7 +23,7 @@ class Cars extends Component {
                             <div className="pt-2 pr-2"><CarOptions/></div>
                         </div>
                         <div className="d-flex flex-column">
-                            <div className="pt-2 pr-2"><CarCard  carList={this.props.carList}  /></div>
+                            <div className="pt-2 pr-2"><CarCard  carList={this.props.carList} carPayment={this.carPayment} /></div>
                         </div>
                         <div className="d-flex flex-column">
                             <div className="pt-2 pr-2"><img src="/images/compare.png"/></div>

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Card, CardActions, CardHeader, CardMedia, CardTitle, CardText} from 'material-ui/Card';
 import RaisedButton from 'material-ui/RaisedButton';
+import BillingMain from "./BillingMain";
 const cardStyle = {
     display: 'block',
     width: '60vw',
@@ -19,6 +20,16 @@ class AdminListings extends Component {
             //
         };
     }
+
+    CarPayment=(id,price)=> {
+      alert(id);
+     // this.props.history.push(<BillingMain/>);
+        var carDetails={};
+        carDetails.id=id;
+        carDetails.price=price;
+        this.props.carPayment(carDetails);
+    };
+
 
     componentWillMount()
     {
@@ -50,7 +61,7 @@ class AdminListings extends Component {
                                             <p className="pr-2">{car.doorCount}  </p>
                                         </div>
                                         <div className="pr-2 form-inline">
-                                            <img src='/images/car-place.png'/>
+                                           <img className="responsive" src='/images/car-place.png'/>
                                             <p className="text-muted mt-3">{car.carPlace}</p>
                                             <p className="pl-2 mt-3">Shuttle </p>
                                         </div>
@@ -67,6 +78,7 @@ class AdminListings extends Component {
                                     label="View Deal"
                                     backgroundColor={'#F52E05'}
                                     label={<span style={{color:'#FFFFFF'}} className='Text-bold'>View Deal</span>}
+                                    onClick={() => this.CarPayment(car.id,car.carPrice)}
                                 />
                                 <br/><br/><br/>
                             </div>

@@ -3,6 +3,7 @@ import {Tabs, Tab} from 'material-ui/Tabs';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {fullWhite} from 'material-ui/styles/colors';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
+import Slider from 'material-ui/Slider';
 import Checkbox from 'material-ui/Checkbox';
 const styles = {
   headline: {
@@ -34,6 +35,7 @@ class CarOptions extends Component {
     this.state = {
       value: 'a',
       checked: false,
+      firstSlider: 0,
     };
   }
   updateCheck() {
@@ -48,6 +50,11 @@ class CarOptions extends Component {
         value: value,
       });
     };
+     handleFirstSlider = (event, value) => {
+         this.setState({firstSlider: value});
+         console.log(this.state.firstSlider);
+         //API call here - whenever the state updates and changes the slider
+     };
     render() {
         return (
             <div className="container-fluid p-2">
@@ -72,6 +79,13 @@ class CarOptions extends Component {
                         onCheck={this.updateCheck.bind(this)}
                         style={styles.checkbox}
                       />
+                      <h3 style={styles.headline} className='Text-bold ml-2 pl-2'>Price</h3><hr/>
+                      <div className="ml-2">${this.state.firstSlider}
+                        <Slider min={0}  max={1000} step={1}
+                        className="mr-2 ml-2 pb-5"
+                        value={this.state.firstSlider}
+                        onChange={this.handleFirstSlider} />
+                      </div>
                     </div>
                   </Tab>
                   <Tab label={<span style={color} className='Text-bold'>More</span>}
