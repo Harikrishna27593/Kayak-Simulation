@@ -14,35 +14,102 @@ export const doLogin = (payload) =>
         credentials:'include',
         body: JSON.stringify(payload)
     }).then(res => res.json())
-        //console.log(res);
-        //return res.status;
-        //res.data;
-    //})
         .catch(error => {
             console.log("doLogin - This is error");
             return error;
         });
 
-        
+export const makePayment = (payload) =>
+    fetch(`${api}/makePayment`, {
+        method: 'POST',
+        headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+        },
+        credentials:'include',
+        body: JSON.stringify(payload)
+    }).then(res => {
+        //  console.log(res.status);
+        return res.status;
+    })
+        .catch(error => {
+            console.log("doLogin - This is error");
+            return error;
+        });
+
+
+export const Signup = (payload) =>
+    fetch(`${api}/signup`, {
+        method: 'POST',
+        headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+        },
+        credentials:'include',
+        body: JSON.stringify(payload)
+    }).then(res => {
+        return res.status;
+    }).catch(error => {
+            console.log("SIGNUP - This is error");
+            return error;
+        });
+
+
 export const getHotelDetails = (hotelPlace,hotelsDateTo,hotelsDateFrom,hotelsRooms) =>
     fetch(`${api}/getHotelDetails?hotelPlace=`+hotelPlace+`&hotelsDateTo=`+hotelsDateTo+`&hotelsDateFrom=`+hotelsDateFrom+`
     &hotelsRooms=`+hotelsRooms+`
-    `)
+    `,{credentials:'include'})
         .then(res => res.json())
         .catch(error => {
             console.log("This is error.");
             return error;
         });
 
-
-
-export const getUserDetails = () =>
-    fetch(`${api}/getUserDetails`,{credentials:'include'})
+export const getUserDetails = (username,firstname,lastname) =>
+    fetch(`${api}/getUserDetails?username=`+username+`&firstname=`+firstname+`&lastname=`+lastname+``,{credentials:'include'})
         .then(res => res.json())
         .catch(error => {
             console.log("This is error.");
             return error;
         });
+
+export const AdminUserCheck = (payload) =>
+    fetch(`${api}/AdminUserCheck`, {
+        method: 'POST',
+        headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+        },
+        credentials:'include',
+        body: JSON.stringify(payload)
+    }).then(res => {
+
+        return res.status;
+    })
+        .catch(error => {
+            console.log("This is error");
+            return error;
+        });
+
+export const AdminUserDelete = (payload) =>
+    fetch(`${api}/AdminUserDelete`, {
+        method: 'POST',
+        headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+        },
+        credentials:'include',
+        body: JSON.stringify(payload)
+    }).then(res => {
+
+        return res.status;
+    })
+        .catch(error => {
+            console.log("This is error");
+            return error;
+        });
+
+
 
 export const carAvailabilityCheck = (payload) =>
     fetch(`${api}/carAvailabilityCheck`, {
@@ -88,9 +155,8 @@ export const carDetails = (place,dropoff,pickup) =>
             return error;
         });
 
-
-export const flightDetails = (placefrom,placeto,datefrom,dateto) =>
-    fetch(`${api}/flightDetails?placefrom=`+placefrom+`&placeto=`+placeto+`&datefrom=`+datefrom+`&dateto=`+dateto+``)
+export const flightDetails = (placefrom,placeto,datefrom,dateto,adultCount,childCount,seniorsCount,flightCabin) =>
+    fetch(`${api}/flightDetails?placefrom=`+placefrom+`&placeto=`+placeto+`&datefrom=`+datefrom+`&dateto=`+dateto+`&adultCount=`+adultCount+`&childCount=`+childCount+`&seniorsCount=`+seniorsCount+`&flightCabin=`+flightCabin+``)
         .then(res => res.json())
         .catch(error => {
             console.log("This is error.");
@@ -151,6 +217,24 @@ export const AddFlightListing = (payload) =>
             return error;
         });
 
+export const AddCarListing = (payload) =>
+    fetch(`${api}/AddCarListing`, {
+        method: 'POST',
+        headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+        },
+        credentials:'include',
+        body: JSON.stringify(payload)
+    }).then(res => {
+
+        return res.status;
+    })
+        .catch(error => {
+            console.log("This is error");
+            return error;
+        });
+
 export const hotelDetails = (payload) =>
     fetch(`${api}/hotelDetails`, {
         method: 'POST',
@@ -162,7 +246,7 @@ export const hotelDetails = (payload) =>
         body: JSON.stringify(payload)
     }).then(res =>{return res.status})
     //console.log(res);
-        //{ return res.status;}
+    //{ return res.status;}
     //return res.status;
     //res.data;
     //})
@@ -174,43 +258,57 @@ export const hotelDetails = (payload) =>
 
 
 export const welcome = () =>
-      fetch(`${api}/welcome`, {
-          method: 'POST',
-          // headers: {
-          //     ...headers,
-          //     'Content-Type': 'application/json'
-          // },
-          credentials:'include',
-          //body: JSON.stringify(payload)
-      }).then(res => res.json())
-          //console.log(res);
-          //return res.status;
-          //res.data;
-      //})
-          .catch(error => {
-              console.log("welcome - This is error");
-              return error;
-          });
+    fetch(`${api}/welcome`, {
+        method: 'POST',
+        // headers: {
+        //     ...headers,
+        //     'Content-Type': 'application/json'
+        // },
+        credentials:'include',
+        //body: JSON.stringify(payload)
+    }).then(res => res.json())
+    //console.log(res);
+    //return res.status;
+    //res.data;
+    //})
+        .catch(error => {
+            console.log("welcome - This is error");
+            return error;
+        });
 
-    export const doSignup = (payload) =>
-        fetch(`${api}/signup`, {
-            method: 'POST',
-            headers: {
-                ...headers,
-                'Content-Type': 'application/json'
-            },
-            credentials:'include',
-            body: JSON.stringify(payload)
-        }).then(res => {
-            console.log(res);
-            return res.status;
-        })
-            .catch(error => {
-                console.log("Sign Up - This is error");
-                return error;
-            });
+export const doSignup = (payload) =>
+    fetch(`${api}/signup`, {
+        method: 'POST',
+        headers: {
+            ...headers,
+            'Content-Type': 'application/json'
+        },
+        credentials:'include',
+        body: JSON.stringify(payload)
+    }).then(res => {
+        console.log(res);
+        return res.status;
+    })
+        .catch(error => {
+            console.log("Sign Up - This is error");
+            return error;
+        });
 
-
+export const logout = () =>
+    fetch(`${api}/logout`, {
+        method: 'POST',
+        headers: {
+            ...headers
+        },
+        credentials:'include'
+    }).then(res => {
+        return res.status;
+        //res.data;
+    })
+        .catch(error => {
+            console.log("logout - This is error");
+            return error;
+        });
 export const CheckListingIdExists = (payload) =>
     fetch(`${api}/CheckListingIdExists`, {
         method: 'POST',
@@ -238,18 +336,27 @@ export const GetListingDetails = (Type,ID) =>
             return error;
         });
 
-export const logout = () =>
-    fetch(`${api}/logout`, {
+export const GetPageStats = () =>
+    fetch(`${api}/GetPageStats`)
+        .then(res => res.json())
+        .catch(error => {
+            console.log("This is error.");
+            return error;
+        });
+
+export const AdminUserUpdate = (payload) =>
+    fetch(`${api}/AdminUserUpdate`, {
         method: 'POST',
         headers: {
-            ...headers
+            ...headers,
+            'Content-Type': 'application/json'
         },
-        credentials:'include'
+        credentials:'include',
+        body: JSON.stringify(payload)
     }).then(res => {
         return res.status;
-        //res.data;
     })
         .catch(error => {
-            console.log("logout - This is error");
+            console.log("This is error");
             return error;
         });
