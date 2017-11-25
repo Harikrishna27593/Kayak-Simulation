@@ -7,6 +7,8 @@ import Checkbox from 'material-ui/Checkbox';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import '../cssfiles/social-buttons.css';
+import * as API from '../api/API';
+
 const muiTheme = getMuiTheme({
     palette: {
       textColor: '#558FE6',
@@ -29,13 +31,24 @@ class Signup extends Component {
             username: '',
             password: ''
         },
-  }
+  };
   handleSigninOpen = () => {
     this.props.handleSigninOpen();
   };
   handleSignUpSubmit = () => {
     //API here
-    console.log(this.state.userdata);
+      API.Signup(this.state.userdata)
+          .then((status) => {
+              console.log("IN SIGNUP");
+              if (status == 200) {
+                  alert("Successfully created account");
+                  this.props.handleDialogClose();
+               //   this.props.history.push("/");
+              } else if (status == 401) {
+                  alert("EMAIL ALREADY EXISTS");
+              }
+          });
+
   };
     render() {
         return (
@@ -92,7 +105,7 @@ class Signup extends Component {
                   </MuiThemeProvider>
                   </div>
                   <div className="row justify-content-md-center responsive">
-                      <RaisedButton label="Sign up" type="submit" fullWidth={true}
+                      <RaisedButton label="Sign up"  fullWidth={true}
                       onClick={() => this.handleSignUpSubmit()}
                        style={style}
                      backgroundColor={grey800} labelColor={fullWhite}/>

@@ -11,8 +11,8 @@ class UpdatedProfile extends Component {
   }
     render() {
         return (
-          <div className="container-fluid">
-          <div className="col-lg-3 justify-content-start ml-5 mt-4 ">
+          <div className="container-fluid p-3" style={{backgroundColor:'#E9ECEF',height: '100vh'}}>
+
             <div className="justify-content-start Text-big Text-bold"><h4>Profile Details: </h4>
             </div> <hr/>
             <form>
@@ -45,7 +45,7 @@ class UpdatedProfile extends Component {
                 />
               </div>
             </form>
-          </div>
+
           </div>
         );
     }
