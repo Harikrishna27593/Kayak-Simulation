@@ -13,6 +13,7 @@ import Flights from "./Flights";
 import UserProfile from "./UserProfile";
 import Cars from "./Cars";
 import '../App.css';
+import {carDetails} from "../api/API";
 const fontSize = {
     fontSize: 45,
     color:fullWhite,
@@ -20,15 +21,44 @@ const fontSize = {
 };
 class NewerHomePage extends Component {
     state = {
-        carListings:[]
+        carListings:[],
+        flightListings:[],
+        carPayment:{},
+        carDetails:{}
     };
 
+
+    handleCarsPayment=(carPaymentdetails)=>{
+        carPaymentdetails.category="car";
+        carPaymentdetails.carPickupPlace=this.state.carDetails.carPickupPlace;
+        carPaymentdetails.carsDatePickUp=this.state.carDetails.carsDatePickUp;
+        carPaymentdetails.carsDateDropOff=this.state.carDetails.carsDateDropOff;
+        carPaymentdetails.carsTimePickUp=this.state.carDetails.carsTimePickUp;
+        carPaymentdetails.carsTimeDropOff=this.state.carDetails.carsTimeDropOff;
+        this.setState({
+   carPayment:carPaymentdetails
+});
+
+this.props.history.push("/billing")
+    };
+    handleCarDetails=(carDetails)=>{
+      this.setState({
+         carDetails:carDetails
+      });
+    };
     handleCars=(cardata) =>{
         this.setState({
             carListings:cardata
         });
         console.log(this.state.carListings);
         this.props.history.push("/Cars");
+    };
+    handleFlights=(cardata) =>{
+        this.setState({
+            flightListings:cardata
+        });
+        console.log(this.state.flightListings);
+        this.props.history.push("/Flights");
     };
 
     render() {
@@ -53,7 +83,7 @@ class NewerHomePage extends Component {
                         </div><br/>
                         <div className="row justify-content-center">
                             <div className="col-md-11 justify-content-center">
-                                <HomePageSearchTabs handleCars={this.handleCars} />
+                                <HomePageSearchTabs handleCarDetails={this.handleCarDetails} handleCars={this.handleCars} handleFlights={this.handleFlights} />
                             </div>
                         </div><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
                     </div>
@@ -65,17 +95,18 @@ class NewerHomePage extends Component {
                     <Hotels/>
                 )}/>
                 <Route exact path="/Flights" render={() => (
-                    <Flights/>
+                    <Flights flightList={this.state.flightListings}/>
                 )}/>
                 <Route exact path="/Cars" render={() => (
-                    <Cars carList={this.state.carListings}/>
+                    <Cars carList={this.state.carListings} carPayment={this.handleCarsPayment}/>
                 )}/>
                 <Route exact path="/billing" render={() => (
-                    <BillingMain/>
+                    <BillingMain carPayment={this.state.carPayment}/>
                 )}/>
                 <Route exact path="/UserProfile" render={() => (
                     <UserProfile/>
                 )}/>
+
             </div>
         );
     }

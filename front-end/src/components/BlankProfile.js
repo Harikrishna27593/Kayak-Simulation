@@ -18,7 +18,7 @@ class BlankProfile extends Component {
     render() {
         return (
             <div className="container-fluid">
-            <div className="col-lg-3 justify-content-start ml-5 mt-4 ">
+
               <div className="justify-content-start Text-big Text-bold"><h4>Please Fill your Details: </h4>
               </div> <hr/>
               <form>
@@ -55,7 +55,7 @@ class BlankProfile extends Component {
                   />
                 </div>
               </form>
-            </div>
+
             </div>
         );
     }

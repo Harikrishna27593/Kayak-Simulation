@@ -18,9 +18,14 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import TimePicker from 'material-ui/TimePicker';
 import RaisedButton from 'material-ui/RaisedButton';
+import FlatButton from 'material-ui/FlatButton';
+import Dialog from 'material-ui/Dialog';
 import * as API from '../api/API';
 import '../App.css';
-
+const customContentStyle = {
+  width: '20%',
+  maxWidth: 'none',
+};
 const styles = {
     marginLeft: 20,
     headline: {
@@ -29,17 +34,28 @@ const styles = {
         marginBottom: 12,
     },
     display: 'inline-block',
+    customWidth: {
+    width: 200,
+  },
 };
 
 const muiTheme = getMuiTheme({
-    flatButton: {
-        primaryTextColor: deepOrange500,
-    },
-    datePicker: {
-        selectColor: deepOrange500,
-        headerColor: deepOrange500,
-    },
-
+  flatButton: {
+  primaryTextColor: deepOrange500,
+  },
+  datePicker: {
+  selectColor: deepOrange500,
+  headerColor: deepOrange500,
+  },
+  timePicker: {
+  selectColor: deepOrange500,
+  headerColor: deepOrange500,
+  },
+  palette: {
+         accent1Color: deepOrange500,
+         selectedTextColor: fullWhite,
+         canvasColor: fullWhite
+     }
 });
 
 const color ={
@@ -66,13 +82,6 @@ const tabBackground ={
 
 
 class HomePageSearchTabs extends Component {
-
-    static propTypes = {
-    };
-
-    state = {
-
-    };
     constructor(props) {
         super(props);
         this.state = {
@@ -93,6 +102,18 @@ class HomePageSearchTabs extends Component {
             carListings:[],
             hotelListings:[],
             flightListings:[],
+           hotelsRoomType:'Single',
+      flightOptions:false,
+      flightCabin:'Economy',
+      flightAdultsCount:0,
+      flightSeniorsCount:0,
+      flightChildCount:0,
+      fDesc:'Options',
+      hotelOptions:false,
+      hotelAdultsCount:0,
+      hotelRoomsCount:0,
+      hotelChildCount:0,
+      hDesc:'Options',
 
         };
     }
@@ -101,7 +122,8 @@ class HomePageSearchTabs extends Component {
         var res = {
             place: this.state.carPickupPlace,
             pickupdate: this.state.carsDatePickUp,
-            dropoffdate: this.state.carsDateDropOff
+            dropoffdate: this.state.carsDateDropOff,
+
         };
 
         API.carAvailabilityCheck(res)
@@ -112,9 +134,19 @@ class HomePageSearchTabs extends Component {
                             this.setState({
                                 carListings: data
                             });
+                            var carDetails={};
+                            carDetails.carPickupPlace=this.state.carPickupPlace;
+                            carDetails.carsDatePickUp=this.state.carsDatePickUp;
+                            carDetails.carsDateDropOff=this.state.carsDateDropOff;
+                            carDetails.carsTimePickUp=this.state.carsTimePickUp;
+                            carDetails.carsTimeDropOff=this.state.carsTimeDropOff;
+                            this.props.handleCarDetails(carDetails);
                             this.props.handleCars(this.state.carListings);
                             console.log(this.state.carListings)
                         });
+                }
+                else {
+                    //error message here
                 }
             });
 
@@ -125,21 +157,23 @@ class HomePageSearchTabs extends Component {
         var res = {
             placefrom: this.state.flightsFrom,
             placeto: this.state.flightsTo,
-            departdate: this.state.flightsDateFrom,
-            arrivaldate: this.state.flightsDateTo
+            departdate: this.state.flightsDateFrom
         };
         API.FlightAvailabilityCheck(res)
             .then((status) => {
                 if (status ==204) {
                     alert("FLIGHT");
-                    API.flightDetails(this.state.flightsFrom,this.state.flightsTo,this.state.flightsDateFrom,this.state.flightsDateTo)
+                    API.flightDetails(this.state.flightsFrom,this.state.flightsTo,this.state.flightsDateFrom,this.state.flightsDateTo,this.state.flightAdultsCount,this.state.flightChildCount,this.state.flightSeniorsCount,this.state.flightCabin)
                         .then((data) => {
                             this.setState({
                                 flightListings: data
                             });
+                            this.props.handleFlights(this.state.flightListings);
                             console.log(this.state.flightListings)
                         });
                 }
+                else
+                    alert("No flight");
             });
 
     };
@@ -242,9 +276,80 @@ class HomePageSearchTabs extends Component {
         this.setState({carsTimePickUp: date});
     };
     handleChangecarsTimeDropOff = (event, date) => {
-        this.setState({carsTimePickUp: date});
+        this.setState({carsTimeDropOff: date});
     };
+flightOptionsOpen = () => {this.setState({flightOptions: true});};
+  flightOptionsClose = () => {this.setState({flightOptions: false});};
+  handleFlightCabin = (event, index, flightCabin) => this.setState({flightCabin});
+minusSeniors = (event) => {
+  var mSenior=this.state.flightSeniorsCount-1;
+  this.setState({flightSeniorsCount: mSenior});
+};
+plusSeniors = (event) => {
+  var pSenior=this.state.flightSeniorsCount+1;
+  this.setState({flightSeniorsCount: pSenior});
+};
+minusAdults = (event) => {
+    var mAdult=0;
+    if(this.state.flightAdultsCount>0) {
+         mAdult = this.state.flightAdultsCount - 1;
+    }
+  this.setState({flightAdultsCount: mAdult});
+};
+plusAdults = (event) => {
+  var pAdult=this.state.flightAdultsCount+1;
+  this.setState({flightAdultsCount: pAdult});
+};
+minusChildren = (event) => {
+  var mChild=this.state.flightChildCount-1;
+  this.setState({flightChildCount: mChild});
+};
+plusChildren = (event) => {
+  var pChild=this.state.flightChildCount+1;
+  this.setState({flightChildCount: pChild});
+};
 
+HotelOptionsOpen = () => {this.setState({hotelOptions: true});};
+hotelOptionsClose = () => {this.setState({hotelOptions: false});};
+handleHotelRoomType = (event, index, hotelsRoomType) => this.setState({hotelsRoomType});
+minusHotelRooms = (event) => {
+  var hotelRoomsCount=this.state.hotelRoomsCount-1;
+  this.setState({hotelRoomsCount: hotelRoomsCount});
+};
+plusHotelRooms = (event) => {
+  var hotelRoomsP=this.state.hotelRoomsCount+1;
+  this.setState({hotelRoomsCount: hotelRoomsP});
+};
+minusHotelAdults = (event) => {
+  var mhAdult=this.state.hotelAdultsCount-1;
+  this.setState({hotelAdultsCount: mhAdult});
+};
+plusHotelAdults = (event) => {
+  var phAdult=this.state.hotelAdultsCount+1;
+  this.setState({hotelAdultsCount: phAdult});
+};
+minusHotelChildren = (event) => {
+  var mhotelChildCount=this.state.hotelChildCount-1;
+  this.setState({hotelChildCount: mhotelChildCount});
+};
+plusHotelChildren = (event) => {
+  var photelChildCount=this.state.hotelChildCount+1;
+  this.setState({hotelChildCount: photelChildCount});
+};
+ flightOptionsSave = () => {
+      let adultCount = this.state.flightAdultsCount,
+      flightCabin = this.state.flightCabin;
+      this.setState({flightOptions: false,
+        fDesc:adultCount + ' ' + 'traveler(s)'+ ', ' + flightCabin,
+      });
+    };
+    hotelOptionsSave = () => {
+      let roomCount = this.state.hotelRoomsCount,
+      roomType = this.state.hotelsRoomType;
+      this.setState({hotelOptions: false,
+        hDesc:roomCount + ' ' + 'Room(s)'+ ', ' + roomType,
+      });
+    };
     componentWillMount(){
         // API.getUserDetails().
         // then((data)=>{
@@ -255,6 +360,29 @@ class HomePageSearchTabs extends Component {
     }
 
     render() {
+         const actions_Flight = [
+      <FlatButton
+        label="Cancel"
+        primary={true}
+        onClick={this.flightOptionsClose}
+      />,
+      <FlatButton
+        label="OK"
+        primary={true}
+        onClick={this.flightOptionsSave}
+      />,
+    ];
+    const actions_Hotel = [
+    <FlatButton
+      label="Cancel"
+      primary={true}
+      onClick={this.hotelOptionsClose}
+    />,
+    <FlatButton
+      label="OK"
+      primary={true}
+      onClick={this.hotelOptionsSave}
+    />,];
         return (
             <div className="container-fluid">
                 <Tabs
@@ -268,7 +396,7 @@ class HomePageSearchTabs extends Component {
                         <div style={{backgroundColor: '#E4E5EA'}}>
 
                          <span className="mr-4 ml-5 mt-5 mb-5">
-                            <TextField hintText="Where" style={styles} underlineShow={false} className="Text-Area"
+                            <TextField hintText="Where" style={styles} underlineShow={false} className="Text-Field"
                                        value={this.state.hotelPlace}
                                        onChange={(event) => {
                                            this.setState({
@@ -298,16 +426,43 @@ class HomePageSearchTabs extends Component {
                             />
                           </span>
                             </MuiThemeProvider>
-                            {/* <DropDownMenu value={this.state.hotelsRooms} onChange={this.handleChangeHotelRooms}>
-                              <MenuItem value={1} label="1 Room" primaryText="1" />
-                              <MenuItem value={2} label="2 Rooms" primaryText="2" />
-                              <MenuItem value={3} label="3 Rooms" primaryText="3" />
-                              <MenuItem value={4} label="4 Rooms" primaryText="4" />
-                              <MenuItem value={5} label="5 Rooms" primaryText="5" />
-                              <MenuItem value={6} label="6 Rooms" primaryText="6" />
-                              <MenuItem value={7} label="7 Rooms" primaryText="7" />
-                              <MenuItem value={8} label="8 Rooms" primaryText="8" />
-                            </DropDownMenu>*/}
+                               <RaisedButton label={this.state.hDesc} className="Text-Field" onClick={this.HotelOptionsOpen} />
+                            <MuiThemeProvider muiTheme={muiTheme}>
+                              <Dialog
+                                actions={actions_Hotel}
+                                modal={true}
+                                contentStyle={customContentStyle}
+                                open={this.state.hotelOptions}>
+                                  <div><h3>Room Type</h3></div>
+                                  <DropDownMenu value={this.state.hotelsRoomType}
+                                    onChange={this.handleHotelRoomType}>
+                                    <MenuItem value={"Single"} primaryText="Single" />
+                                    <MenuItem value={"Double"} primaryText="Double" />
+                                    <MenuItem value={"Suite"} primaryText="Suite" />
+                                  </DropDownMenu>
+                                  <div><h3>Occupancy</h3></div><hr/>
+                                  <div>
+                                    <label className="mr-2" >Adults
+                                        <button onClick={this.minusHotelAdults} className="btn btn-outline-secondary btn-xs ml-4 mr-2">-</button>
+                                        {this.state.hotelAdultsCount}
+                                        <button onClick={this.plusHotelAdults} className="btn btn-outline-secondary btn-xs ml-2 mr-4">+</button>
+                                    </label>
+                                    <br/>
+                                    <label className="mr-1">Rooms
+                                        <button onClick={this.minusHotelRooms} className="btn btn-outline-secondary btn-xs ml-4 mr-2">-</button>
+                                        {this.state.hotelRoomsCount}
+                                        <button onClick={this.plusHotelRooms} className="btn btn-outline-secondary btn-xs ml-2 mr-5">+</button>
+                                    </label>
+                                    <br/>
+                                    <label className="mr-1">Children
+                                        <button onClick={this.minusHotelChildren} className="btn btn-outline-secondary btn-xs ml-3 mr-2">-</button>
+                                        {this.state.hotelChildCount}
+                                        <button onClick={this.plusHotelChildren} className="btn btn-outline-secondary btn-xs ml-2 mr-5">+</button>
+                                    </label>
+
+                              </div>
+                              </Dialog>
+                              </MuiThemeProvider>
                             <span className="mr-4 mt-5 mb-5">
                               <RaisedButton
                                   backgroundColor={deepOrange500}
@@ -315,7 +470,7 @@ class HomePageSearchTabs extends Component {
                                   style = {{height: '100px'}}
                                   icon={<Arrow color={fullWhite}/>}
                                   style={button}
-                                  onClick={this.HotelSearch}/>
+                                  onClick={this.hotelSearch}/>
                             </span>
                         </div>
                     </Tab>
@@ -328,14 +483,14 @@ class HomePageSearchTabs extends Component {
                                        underlineShow={false}
                                        value={this.state.flightsFrom}
                                        onChange={this.handleChangeFlightsFrom}
-                                       className="Text-Area"/>
+                                      className="Text-Field"/>
                           </span>
-                            <span className="mr-4 ml-5 mt-5 mb-5">
+                            <span className="mr-4 mt-5 mb-5">
                           <TextField hintText="To Where?" style={styles}
                                      underlineShow={false}
                                      value={this.state.flightsTo}
                                      onChange={this.handleChangeFlightsTo}
-                                     className="Text-Area"/>
+                                     className="Text-Field"/>
                           </span>
                             <MuiThemeProvider muiTheme={muiTheme}>
                             <span className="mr-4 mt-5 mb-5">
@@ -347,26 +502,45 @@ class HomePageSearchTabs extends Component {
                                           underlineShow={false}/>
                             </span>
                             </MuiThemeProvider>
-                            <MuiThemeProvider muiTheme={muiTheme}>
-                          <span className="mr-4 mt-5 mb-5">
-                            <DatePicker style={styles}
-                                        hintText="Return"
-                                        value={this.state.flightsDateTo}
-                                        onChange={this.handleChangeFlightsDateTo}
-                                        className="Text-Area"
-                                        underlineShow={false}/>
-                            </span>
+                        <RaisedButton label={this.state.fDesc} className="Text-Field" onClick={this.flightOptionsOpen} />
+                          <MuiThemeProvider muiTheme={muiTheme}>
+                          <Dialog
+                              actions={actions_Flight}
+                              modal={true}
+                              contentStyle={customContentStyle}
+                              open={this.state.flightOptions}>
+                                <div><h3>Cabin Class</h3></div>
+                                <DropDownMenu className="mb-3"
+                                  value={this.state.flightCabin}
+                                  onChange={this.handleFlightCabin}
+                                  style={styles.customWidth}
+                                  autoWidth={false}>
+                                  <MenuItem value={"Economy"} primaryText="Economy" />
+                                  <MenuItem value={"Business"} primaryText="Business" />
+                                  <MenuItem value={"First"} primaryText="First" />
+                                </DropDownMenu>
+                                <div><h3>Travelers</h3></div><hr/>
+                                <div>
+                                  <label className="mr-2" >Adults
+                                      <button onClick={this.minusAdults} className="btn btn-outline-secondary btn-xs ml-4 mr-2">-</button>
+                                      {this.state.flightAdultsCount}
+                                      <button onClick={this.plusAdults} className="btn btn-outline-secondary btn-xs ml-2 mr-4">+</button>
+                                  </label>
+                                  <br/>
+                                  <label className="mr-1">Seniors
+                                      <button onClick={this.minusSeniors} className="btn btn-outline-secondary btn-xs ml-4 mr-2">-</button>
+                                      {this.state.flightSeniorsCount}
+                                      <button onClick={this.plusSeniors} className="btn btn-outline-secondary btn-xs ml-2 mr-5">+</button>
+                                  </label>
+                                  <br/>
+                                  <label className="mr-1">Children
+                                      <button onClick={this.minusChildren} className="btn btn-outline-secondary btn-xs ml-3 mr-2">-</button>
+                                      {this.state.flightChildCount}
+                                      <button onClick={this.plusChildren} className="btn btn-outline-secondary btn-xs ml-2 mr-5">+</button>
+                                  </label>
+                            </div>
+                            </Dialog>
                             </MuiThemeProvider>
-                            {/*<DropDownMenu value={this.state.flightNumberOfAdults} onChange={this.handleChangeFlightNumberOfAdults}>
-                            <MenuItem value={1} label="1 Adult" primaryText="1" />
-                            <MenuItem value={2} label="2 Adults" primaryText="2" />
-                            <MenuItem value={3} label="3 Adults" primaryText="3" />
-                            <MenuItem value={4} label="4 Adults" primaryText="4" />
-                            <MenuItem value={5} label="5 Adults" primaryText="5" />
-                            <MenuItem value={6} label="6 Adults" primaryText="6" />
-                            <MenuItem value={7} label="7 Adults" primaryText="7" />
-                            <MenuItem value={8} label="8 Adults" primaryText="8" />
-                          </DropDownMenu>*/}
                             <span className="mr-4 mt-5 mb-5">
                             <RaisedButton className="m-2"
                                           backgroundColor={deepOrange500}
@@ -386,7 +560,7 @@ class HomePageSearchTabs extends Component {
                         <span className="mr-4 ml-5 mt-5 mb-5">
                           <TextField hintText="Where" style={styles}
                                      underlineShow={false}
-                                     className="Text-Area"
+                                      className="Text-Field"
                                      value={this.state.carPickupPlace}
                                      onChange={(event) => {
                                          this.setState({
@@ -405,7 +579,7 @@ class HomePageSearchTabs extends Component {
                           </span>
                             </MuiThemeProvider>
                             <MuiThemeProvider muiTheme={muiTheme}>
-                          <span className="mr-4 mt-5 mb-5">
+                          <span className="mr-4 ml-5 pl-5">
                             <DatePicker style={styles}
                                         underlineShow={false}
                                         hintText="drop-off on"
@@ -426,14 +600,14 @@ class HomePageSearchTabs extends Component {
                           </span>
                             </MuiThemeProvider>
                             <MuiThemeProvider muiTheme={muiTheme}>
-                          <span className="mr-4 mt-5 mb-5">
-                            <TimePicker
+                           <span className="mr-4 ml-5">
+ +                            <TimePicker style={styles}
                                 format="ampm"
                                 underlineShow={false}
                                 hintText="drop-off at"
                                 value={this.state.carsTimeDropOff}
                                 onChange={this.handleChangecarsTimeDropOff}
-                                className="Text-Area"/>
+                                className="Text-Field"/>
                           </span>
                             </MuiThemeProvider>
                             <span className="mr-4 mt-5 mb-5">
