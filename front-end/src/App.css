@@ -25,6 +25,11 @@
   font-size: large;
 }
 
+.hr {
+  height: 1px #E4E5EA !important;
+  border-top: 1px solid #E4E5EA !important;
+}
+
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -36,6 +41,22 @@
     border: 10px solid #ffffff !important;
     font-weight: 900 ;
   }
+
+  .Text-Field {
+      width: 20% !important;
+      height: 10% !important;
+      margin: 60px auto !important;
+      background-color: white !important;
+      border: 20px solid #ffffff !important;
+      font-weight: 900 ;
+    }
+  .Text-Area-dropdown {
+      width: 7% !important;
+      margin: 60px auto !important;
+      background-color: white !important;
+      border: 20px solid #ffffff !important;
+      font-weight: 100 ;
+    }
   .popup {
       border: 1px solid #FF5722 !important;
     }
@@ -45,9 +66,10 @@
     }
 
     .Admin-userSearch {
-        width: 20% !important;
+        width: 22% !important;
         margin: 10px auto !important;
         background-color: white !important;
+        padding-left: 2px auto !important;
         font-weight: 400 ;
       }
       .Text-bold {
@@ -55,4 +77,6 @@
         }
         .Text-big{
             font-size: large ;
-          }
+          }.Text-white{
+              font-color: #ffffff !important ;
+            }

@@ -25,14 +25,22 @@ class AdminListingsMain extends Component {
   this.state = {
       isListingsUpdate:false,
       isListingsAdd:false,
+       hotelUpdate:false,
+      flightUpdate:false,
+      carUpdate:false,
       open: false,
       value: 'Hotel',
       IdToSearch:'',
-      fetchedListing:[]
+      fetchedListing:[],
+      FlightDetails : {'flightPrice':'455','Origin':'SFO','Destination':'DAL','DepartureTime':'4:00 pm','ArrivalTime':'2:00 am',
+                        'DepartureDate':'8-19-2017','ArrivalDate':'8-20-2017','type':'nonstop','Operator':'United','FlightID':'SEO456','cabinType':'Business'},
+      CarDetails : {'carPrice':'455','CarType':'Economy','doors':'4','people':'4','bags':'2','Place':'OAK','carID':'1'},
+      HotelDetails : {'HotelID':'SO456','City':'San Jose','Name':'Hotel Indigo','Rooms':{'singleRoomPrice':'354','doubleRoomPrice':'777','suitRoomPrice':'985',},
+                      'Address':'6057 Gary Drive','State':'Texas','Ratings':'2','Availability':'yes','hotelsDateFrom':'8-20-2018','hotelsDateTo':'8-20-2018', },
   };
   }
   handleOpen = () => {
-   this.setState({open: true});
+   this.setState({open: true,isListingsAdd:false});
  };
 handleChange = (event, index, value) => this.setState({value});
  handleClose = () => {
@@ -47,9 +55,12 @@ handleChange = (event, index, value) => this.setState({value});
     isListingsAdd:false
   });};
   AddSearchID = (event) => {this.setState({IdToSearch: event.target.value});};
-  submitIdSearch = () => {this.setState({
-    open: false,
-  });
+ submitIdSearch = () => {this.setState({open: false,});
+ 
+ if(this.state.value == "Hotel"){this.setState({hotelUpdate:true,flightUpdate:false,carUpdate:false,})}
+      if(this.state.value == "Flight"){this.setState({hotelUpdate:true,flightUpdate:true,carUpdate:false,})}
+      if(this.state.value == "Car"){this.setState({hotelUpdate:true,flightUpdate:false,carUpdate:true,})}
+ 
     console.log("Type: "+this.state.value);
     console.log("ID to search: "+this.state.IdToSearch);
      var IdtoSearch = {
@@ -132,6 +143,21 @@ handleChange = (event, index, value) => this.setState({value});
                 {
                   this.state.isListingsAdd
                   ?<AdminListingsAdd/>
+                  :null
+                }
+                {
+                  this.state.flightUpdate
+                  ?"flight update details"
+                  :null
+                }
+                {
+                  this.state.hotelUpdate
+                  ?"hotel update details"
+                  :null
+                }
+                {
+                  this.state.carUpdate
+                  ?"car update details"
                   :null
                 }
                 </div>
