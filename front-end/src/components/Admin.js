@@ -10,6 +10,7 @@ import AdminListingsMain from "./AdminListingsMain";
 import BarChartData from "./BarChartData";
 import Menu from 'material-ui/svg-icons/navigation/menu';
 import RaisedButton from 'material-ui/RaisedButton';
+import {fullWhite,red300} from 'material-ui/styles/colors';
 class Admin extends Component {
   constructor(props) {
       super(props);
@@ -64,6 +65,12 @@ handleToggle = () => this.setState({open: !this.state.open});
    isHomePage:true,
  });
 
+ handleLogout = () => {
+    console.log("Handle log out")
+    //Delete the session in backend
+    this.props.history.push("/")
+  };
+
  addAdmin = (AdminToAdd) => {
    this.props.addAdmin(AdminToAdd);
  }
@@ -89,6 +96,14 @@ handleToggle = () => this.setState({open: !this.state.open});
             <MenuItem onClick={this.handleUsers}>Manage Users</MenuItem>
             <MenuItem onClick={this.handleBills}>Search Payment info</MenuItem>
             <MenuItem onClick={this.handleHome}>Home</MenuItem>
+            <MenuItem onClick={this.handleHome}>
+                <RaisedButton className="mt-4"
+                label = "Log out"
+                labelColor ={red300}
+                backgroundColor={fullWhite}
+                onClick={this.handleLogout}
+                />
+            </MenuItem>
           </Drawer>
           </div>
           <div className="row ml-5 mt-5 col-md-10 justify-content-md-center">

@@ -62,6 +62,15 @@ class HomePageSearchTabs extends Component {
       FLightOrigin :'',
       FLightDest:'',
       FlightPrice:0,
+      CarId:'',
+      CarType: 'Compact',
+      CarPlace:'',
+      carsDatePickUp:'',
+      carsDateDropOff:'',
+      CarPrice:'0',
+      CarPeople:'1',
+      CarDoors:'1',
+      CarBags:'1',
 
     };
   }
@@ -82,8 +91,16 @@ class HomePageSearchTabs extends Component {
       HotelState:this.state.HotelState,
       HotelPrice:this.state.HotelPrice,
     };
+      API.addHotelListing(hotelDetails).
+      then((status1) =>{
+          if(status1===201)
+              alert("Succesfully Added to the hotel");
+      });
     console.log(hotelDetails);
   };
+
+
+
 
   AddFlightId = (event) => {this.setState({FlightId: event.target.value});};
   AddFilghtOperator = (event) => {this.setState({FilghtOperator : event.target.value});};
@@ -115,6 +132,38 @@ class HomePageSearchTabs extends Component {
 
 
   };
+  
+   AddCarId = (event) => {this.setState({CarId: event.target.value});};
+  handleCarType = (event, index, CarType) => this.setState({CarType});
+  AddCarPlace = (event) => {this.setState({CarPlace: event.target.value});};
+  handleChangeCarsDatePickUp = (event, date) => {this.setState({carsDatePickUp: date,});};
+  handleChangeCarsDateDropOff = (event, value) => {this.setState({carsDateDropOff: value,});};
+  AddCarPrice = (event) => {this.setState({CarPrice: event.target.value});};
+  handleCarPeople = (event, index, CarPeople) => this.setState({CarPeople});
+  handleCarDoors = (event, index, CarDoors) => this.setState({CarDoors});
+  handleCarBags = (event, index, CarBags) => this.setState({CarBags});
+  addCarListing = () => {
+    var CarDetails={
+      CarId:this.state.CarId,
+      CarType: this.state.CarType,
+      CarPlace:this.state.CarPlace,
+      carsDatePickUp:this.state.carsDatePickUp,
+      carsDateDropOff:this.state.carsDateDropOff,
+      CarPrice:this.state.CarPrice,
+      CarPeople:this.state.CarPeople,
+      CarDoors:this.state.CarDoors,
+      CarBags:this.state.CarBags,
+
+    }
+    console.log(CarDetails);
+      API.AddCarListing(CarDetails)
+          .then((status) => {
+              if (status ==204) {
+                  alert("FLIGHT");
+              }
+          });
+  };
+  
   componentWillMount(){
     this.setState({
       HotelPrice: this.state.HotelPrice,
@@ -124,12 +173,12 @@ class HomePageSearchTabs extends Component {
     render() {
         return (
             <div className="container-fluid">
-            <Tabs
+             <Tabs style={{backgroundColor:'#E9ECEF'}}
             styles={color}
               value={this.state.value}
               onChange={this.handleChangeTab}>
                     <Tab label="HOTELS" backgroundColor={deepOrange500} icon={<Hotel />} value="Hotels">
-                      <div>
+                      <div style={{backgroundColor: '#E9ECEF'}} >
                         <Paper zDepth={1}>
                         <TextField className="mr-4 m1-4"
                             floatingLabelText="ID"
@@ -204,6 +253,62 @@ class HomePageSearchTabs extends Component {
                     <Tab label="CARS" value="Cars" icon={<Car />} >
                       <div>
                       <Paper zDepth={1}>
+                      <TextField className="ml-3"
+                          floatingLabelText="ID"
+                          onChange={this.AddCarId}/>
+                      <label>Car Type:</label>
+                      <DropDownMenu className="mt-3 ml-3" value={this.state.CarType} onChange={this.handleCarType}>
+                        <MenuItem value={'Compact'} primaryText="Compact" />
+                        <MenuItem value={'SUV'} primaryText="SUV" />
+                        <MenuItem value={'Sedan'} primaryText="Sedan" />
+                      </DropDownMenu>
+                      <TextField className="ml-3"
+                          floatingLabelText="Place"
+                          onChange={this.AddCarPlace}/>
+                      <DatePicker className="ml-3"
+                        hintText="pick-up on"
+                        value={this.state.carsDatePickUp}
+                        onChange={this.handleChangeCarsDatePickUp}/>
+                      <DatePicker className="ml-3"
+                        hintText="drop-off on"
+                        value={this.state.carsDateDropOff}
+                        onChange={this.handleChangeCarsDateDropOff}/>
+                      <TextField className="ml-3"
+                          floatingLabelText="Price in $"
+                          type="number"
+                          onChange={this.AddCarPrice}/>
+                      <div>
+                        <label className="ml-3">People:</label>
+                        <DropDownMenu value={this.state.CarPeople} onChange={this.handleCarPeople}>
+                          <MenuItem value={'1'} primaryText="1" />
+                          <MenuItem value={'2'} primaryText="2" />
+                          <MenuItem value={'3'} primaryText="3" />
+                          <MenuItem value={'4'} primaryText="4" />
+                          <MenuItem value={'5'} primaryText="5" />
+                          <MenuItem value={'6'} primaryText="6" />
+                        </DropDownMenu>
+                        <label className="mt-3">Doors:</label>
+                        <DropDownMenu value={this.state.CarDoors} onChange={this.handleCarDoors}>
+                          <MenuItem value={'1'} primaryText="1" />
+                          <MenuItem value={'2'} primaryText="2" />
+                          <MenuItem value={'3'} primaryText="3" />
+                          <MenuItem value={'4'} primaryText="4" />
+                        </DropDownMenu>
+                        <label>Bags:</label>
+                        <DropDownMenu value={this.state.CarBags} onChange={this.handleCarBags}>
+                          <MenuItem value={'1'} primaryText="1" />
+                          <MenuItem value={'2'} primaryText="2" />
+                          <MenuItem value={'3'} primaryText="3" />
+                          <MenuItem value={'4'} primaryText="4" />
+                        </DropDownMenu>
+                      </div>
+                      <Divider/>
+                      <RaisedButton
+                      label = "Add Listing"
+                      labelColor ={fullWhite}
+                      backgroundColor={cyan500}
+                      onClick={this.addCarListing}
+                      />
                         </Paper>
                       </div>
                     </Tab>
