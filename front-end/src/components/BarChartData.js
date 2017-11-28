@@ -13,6 +13,10 @@ const data = [
 ];
 
 
+
+
+
+
 class BarChartData extends Component {
 
     render() {

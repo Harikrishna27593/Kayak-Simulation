@@ -61,7 +61,7 @@ class MyAccountHome extends Component {
         isSigninPage:false,
         isSignupPage:false,
         openPopup:false,
-        isGuest:false,
+        isGuest:true,
       };
     }
 
@@ -92,22 +92,33 @@ this.setState({
 };
 
 handleDialogClose = () => {
-  this.setState({openDialog: false});
+  this.setState({
+      isGuest:false,
+      openDialog: false
+  });
 };
 handleSignupOpen= () => {
   this.setState({
     openDialog: true,
     isSigninPage:false,
     isSignupPage:true,
-
   });
 };
+
+handleUserSigned=()=>{
+        alert("IN signed");
+        this.setState({
+            isGuest:false,
+            openDialog: false
+        });
+    console.log("IN Hanlde user my account");
+    };
+
 handleSigninOpen= () => {
   this.setState({
     openDialog: true,
     isSigninPage:true,
     isSignupPage:false,
-
   });
 };
 
@@ -121,6 +132,12 @@ handleRequestClose = () => {
   });
 };
 
+handleAdmin=()=>{
+    this.setState({
+        openDialog: false,
+    });
+    this.props.history.push("/Admin");
+};
 viewProfile = () => {this.props.history.push("/UserProfile")};
 
     render() {
@@ -191,12 +208,12 @@ const actions = [
             >
             {
               this.state.isSignupPage
-              ?<Signup handleSigninOpen={this.handleSigninOpen}/>
+              ?<Signup handleSigninOpen={this.handleSigninOpen} handleDialogClose={this.handleDialogClose} />
               :null
             }
             {
               this.state.isSigninPage
-              ?<Signin handleSignupOpen={this.handleSignupOpen} handleSignin={this.handleSignupOpen}/>
+              ?<Signin handleSignupOpen={this.handleSignupOpen} handleAdmin={this.handleAdmin}  handleUserSigned={this.handleUserSigned} handleSignin={this.handleSignupOpen}/>
               :null
             }
             </Dialog>

@@ -3,6 +3,8 @@ import BillingNavBar from "./BillingNavBar";
 import DropDownMenu from 'material-ui/DropDownMenu';
 import MenuItem from 'material-ui/MenuItem';
 import RaisedButton from 'material-ui/RaisedButton';
+import * as API from '../api/API';
+
 const styles = {
   customWidth: {
     width: 120,
@@ -30,11 +32,27 @@ class BillingMain extends Component {
         city:'',
         cardNumber:'',
         cvv:'',
+        itemcategory:''
       };
     }
+
+    componentWillMount(){
+    //    console.log(this.props.carPayment);
+  //alert(this.props.carPayment.id);
+  }
+
     submitPayment = () => {
+            API.makePayment(this.props.carPayment)
+                .then((result) => {
+                if(result==200)
+                alert("Successfully Payment done");
+                else
+                    alert("not done");
+                });
+            //console.log(this.state.userdata);
       console.log("payment Details: "+this.state);
   };
+
     handleChangeMonth = (event, index, monthValue) => this.setState({monthValue});
     handleChangeYear = (event, index, YearValue) => this.setState({YearValue});
     render() {
