@@ -2,7 +2,7 @@ var mongo = require("./mongo");
 var mongoURL = "mongodb://localhost:27017/login";
 var winston = require('winston');
 function handle_request(msg, callback){
-    winston.remove(winston.transports.File);
+    winston.remove(winston.transports.Console);
     winston.add(winston.transports.File, { filename: './public/LogFiles/KayakAnalysis.json' });
     winston.log('info', 'Signup Page Viewed', { page_name : 'Signup_page'});
 
@@ -46,6 +46,8 @@ function handle_request(msg, callback){
 
 
   });
+    winston.remove(winston.transports.File);
+    winston.add(winston.transports.Console);
 
 }
 

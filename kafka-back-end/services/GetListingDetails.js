@@ -21,6 +21,7 @@ function handle_request(msg, callback){
                             i=0;
                             resArr = hotels.map(function (file) {
                                 var hotelsJSON = {};
+                                hotelsJSON.Typeof='Hotel'
                                 hotelsJSON.id=hotels[i].hotelId;
                                 hotelsJSON.name = hotels[i].Name;
                                 hotelsJSON.address = hotels[i].Address;
@@ -57,13 +58,20 @@ function handle_request(msg, callback){
                             var resArr = [];
                             resArr = flights.map(function (file) {
                                 var flightsJSON = {};
-                                flightsJSON.Type='Flight'
-                                flightsJSON.id=flights[i].FlightId
-                                flightsJSON.operator = flights[i].Operator;
-                                flightsJSON.origin=flights[i].Origin;
-                                flightsJSON.destination=flights[i].Destination;
-                                //flightsJSON.doorCount=flights[i].Doors;
-                                //flightsJSON.carPrice=flights[i].Price;
+                                flightsJSON.Typeof='Flight'
+                                flightsJSON.FlightID=flights[i].FlightId
+                                flightsJSON.Operator = flights[i].Operator;
+                                flightsJSON.Origin=flights[i].Origin;
+                                flightsJSON.Destination=flights[i].Destination;
+                                flightsJSON.DepartureTime=flights[i].DepartureTime;
+                                flightsJSON.departuredate=flights[i].DepartureDate
+                                flightsJSON.ArrivalTime = flights[i].ArrivalTime;
+                                flightsJSON.arrivaldate=flights[i].ArrivalDate;
+                                flightsJSON.type=flights[i].Type;
+                                flightsJSON.economy = flights[i].Economy;
+                                flightsJSON.firstclass=flights[i].FirstClass;
+                                flightsJSON.business=flights[i].Business;
+                                flightsJSON.totaltime=flights[i].TotalTime;
                                 i=i+1;
                                 return flightsJSON;
 
@@ -92,9 +100,9 @@ function handle_request(msg, callback){
                             i=0;
                             resArr = cars.map(function (file) {
                                 var carsJSON = {};
-                                carsJSON.Type='Car'
+                                carsJSON.Typeof='Car'
                                 carsJSON.id=cars[i].CarId
-                                carsJSON.carType = cars[i].CarType;
+                                carsJSON.cartype = cars[i].CarType;
                                 carsJSON.place = cars[i].Place;
                                 // carsJSON.carName=cars[i].CarName;
                                 carsJSON.peopleCount=cars[i].People;

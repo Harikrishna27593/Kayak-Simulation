@@ -2,7 +2,7 @@ var MongoConPool=require("./MongoConPool");
 var winston = require('winston');
 function handle_request(msg, callback){
 
-    winston.remove(winston.transports.File);
+    winston.remove(winston.transports.Console);
     winston.add(winston.transports.File, { filename: './public/LogFiles/KayakAnalysis.json' });
     winston.log('info', 'Login Page Viewed', { page_name : 'Login_page'});
 
@@ -24,6 +24,8 @@ function handle_request(msg, callback){
                 }
                 callback(null, res);
             });
+    winston.remove(winston.transports.File);
+    winston.add(winston.transports.Console);
 
 }
 

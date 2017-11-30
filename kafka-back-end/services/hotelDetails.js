@@ -20,7 +20,7 @@ function hotel_details(msg, callback){
 }
 function gethoteldetails(msg, callback){
 
-    winston.remove(winston.transports.File);
+    winston.remove(winston.transports.Console);
     winston.add(winston.transports.File, { filename: './public/LogFiles/KayakAnalysis.json' });
     winston.log('info', 'Hotel Page Viewed', { page_name : 'Hotels_page'});
 
@@ -39,6 +39,8 @@ function gethoteldetails(msg, callback){
             callback(null, res);
         });
     });
+    winston.remove(winston.transports.File);
+    winston.add(winston.transports.Console);
 }
 
 
