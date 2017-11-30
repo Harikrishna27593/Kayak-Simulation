@@ -61,35 +61,182 @@ app.post('/logout', function(req,res) {
 
 app.post('/login', function(req, res) {
     passport.authenticate('login', function(err, user) {
+        var res1={};
         if(err) {
-            res.status(500).send();
+            res1.status=500;
+            return res1;
+
         }
         if(!user) {
-            res.status(401).send();
+            console.log("ASAASA");
+            res1.status=401;
+            return res.status(401).send(res1);
         }
         else{
-        req.session.user = user.username;
-        console.log(user);
-        console.log(req.session.user);
-        console.log("session initilized");
-        return res.status(201).send();
-      }
+            req.session.user = user.username;
+            console.log("\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+            console.log(user.isAdmin);
+            console.log(user);
+            console.log("\\\\\\\\\\\\\\\\\\\\\\\\\\\\");
+            res1.status=201;
+            res1.isAdmin=user.isAdmin;
+            console.log("session initilized");
+            return res.status(200).send(res1);
+        }
     })(req, res);
+});
+
+
+app.get('/getUser',function (req,res) {
+    console.log("in getUser");
+    var res1={};
+    res1.user=req.session.user;
+    console.log(req.session.user);
+    res.send(res1);
+});
+
+
+app.get('/getPaymentById',function (req,res) {
+    //
+    // kafka.make_request('AdminSearchPaymentsID_topic',{"paymentId":req.param.},function (err,results) {
+    //     //console.log(results);
+    //     res.send(results);
+    // });
+});
+
+app.get('/getUserPayments',function (req,res) {
+
+    console.log('-----------------');
+    console.log(req.session.user);
+    console.log('-----------------');
+    kafka.make_request('getUserPayments',{"username":req.session.user},function (err,results) {
+        //console.log(results);
+        res.send(results);
+    })
+});
+
+app.get('/getPaymentDetails',function (req,res) {
+    console.log('--------------------');
+    console.log(req.param('month'));
+
+    if(req.param('month')>=1) {
+        var output={};
+        output.month=req.param('month');
+        output.type='month';
+        console.log("SANJAY");
+    }
+    else {
+        console.log("IN ELSE BLOCK");
+        var paymentDate = new Date(req.param('date'));
+        var dd = paymentDate.getDate();
+        var mm = paymentDate.getMonth() + 1; //January is 0!
+        var yyyy = paymentDate.getFullYear();
+        if (dd < 10) {
+            dd = '0' + dd
+        }
+        if (mm < 10) {
+            mm = '0' + mm
+        }
+        fPayementDate = yyyy + '-' + mm + '-' + dd;
+        console.log(fPayementDate);
+        console.log('--------------------');
+        var output={};
+        output.date=fPayementDate;
+        console.log(output);
+    }
+
+    kafka.make_request('AdminSearchPayments_topic',{"input":output},function (err,results) {
+        //console.log(results);
+        res.send(results);
+    })
+});
+
+
+
+app.get('/getFuturePayments',function (req,res) {
+    kafka.make_request('getFuturePayments',{"username":req.session.user},function (err,results) {
+        //console.log(results);
+        res.send(results);
+    })
 });
 
 
 
 
 
+
+
+
+
+
+
 app.get('/getUserDetails',function (req,res) {
-console.log("IN GET USER DETAILS");
-    kafka.make_request('getuserdata','nodata', function(err,results){
-        console.log('in result');
-       // console.log(results);
-        //console.log(results.code);
-        if(results.length> 0){
-            // console.log(results.arr);
-            res.send(results);
+    console.log("IN GET USER DETAILS");
+    kafka.make_request('getuserdata',{"username":req.param('username'),"firstname":req.param('firstname'),"lastname":req.param('lastname')}, function(err,results){
+        if(err){
+            res.status(401).send();
+        }
+        else
+        {
+            if(results.code == 200){
+                console.log(results.arr);
+                return res.status(200).send(results.arr);
+            }
+            else {
+                res.status(401).send();
+            }
+        }
+
+    });
+});
+
+app.post('/AdminUserCheck',function(req, res) {
+    kafka.make_request('AdminUserCheck_topic',{"username":req.body.username,"firstname":req.body.firstname,"lastname":req.body.lastname}, function(err,results){
+        if(err){
+            res.status(401).send();
+        }
+        else
+        {
+            if(results.code == 200){
+                return res.status(204).send();
+            }
+            else {
+                res.status(401).send();
+            }
+        }
+    });
+});
+
+app.post('/AdminUserDelete',function(req, res) {
+    kafka.make_request('AdminUserDelete_topic',{"username":req.body.user}, function(err,results){
+        if(err){
+            res.status(401).send();
+        }
+        else
+        {
+            if(results.code == 200){
+                return res.status(204).send();
+            }
+            else {
+                res.status(401).send();
+            }
+        }
+    });
+});
+
+app.post('/AdminUserUpdate',function(req, res) {
+    kafka.make_request('AdminUserUpdate_topic',{"username":req.body.username,"firstname":req.body.firstname,"lastname":req.body.lastname,"Address":req.body.Address,"City":req.body.City,"State":req.body.State,"phoneNumber":req.body.phoneNumber,"creditcard":req.body.creditcard,"usertoedit":req.body.usertoedit}, function(err,results){
+        if(err){
+            res.status(401).send();
+        }
+        else
+        {
+            if(results.code == 204){
+                return res.status(204).send();
+            }
+            else {
+                res.status(401).send();
+            }
         }
     });
 });
@@ -135,18 +282,29 @@ app.post('/addAdmin',function(req, res) {
     });
 });
 
-
+app.post('/DeleteUser',function(req, res) {
+    kafka.make_request('DeleteUser_topic',{"username":req.session.user}, function(err,results){
+        if(err){
+            res.status(401).send();
+        }
+        else
+        {
+            if(results.code == 200){
+                req.session.destroy();
+                console.log('Session Destroyed');
+                return res.status(204).send();
+            }
+            else {
+                res.status(401).send();
+            }
+        }
+    });
+});
 
 app.get('/carDetails',function(req, res) {
-    //console.log(req.param('place'));
-    //console.log(req.param('pickup'));
-
     var carP=req.param('place');
     var carSmall=carP.substr(1).toLowerCase();
     var carPlace=carP.charAt(0).toUpperCase()+carSmall;
-
-    console.log(carPlace);
-
     kafka.make_request('CarSearch_topic',{"place":carPlace,"pickup":req.param('pickup'),"dropoff":req.param('dropoff')}, function(err,results){
         console.log('in result');
         //console.log(results);
@@ -166,7 +324,6 @@ app.get('/carDetails',function(req, res) {
         }
     });
 });
-
 
 app.post('/FlightAvailabilityCheck',function(req, res) {
 
@@ -208,8 +365,8 @@ app.post('/FlightAvailabilityCheck',function(req, res) {
     var arrivalDate=to.getFullYear()+'-'+tomonth+'-'+todate;
 
     kafka.make_request('FlightAvailabilityCheck_topic',{"placefrom":flightPlace,"placeto":flightToPlace,"departdate":departDate,"arrivaldate":arrivalDate}, function(err,results){
-      console.log('---------------');
-       console.log(results);
+        console.log('---------------');
+        console.log(results);
         console.log('---------------');
         if(err){
             res.status(401).send();
@@ -246,6 +403,14 @@ app.get('/flightDetails',function(req, res) {
     var from=new Date(req.param('datefrom'));
     //var hotelsDateFrom=from.toString().split('T');
     console.log('--------------');
+    console.log('--------------');
+    console.log('--------------');
+    console.log(req.body);
+    console.log('--------------');
+    console.log('--------------');
+    console.log('--------------');
+
+
     var fmonth=from.getMonth()+1;
     var tomonth=to.getMonth()+1;
     if(fmonth<10)
@@ -269,11 +434,17 @@ app.get('/flightDetails',function(req, res) {
     var departDate=from.getFullYear()+'-'+fmonth+'-'+fdate;
     var arrivalDate=to.getFullYear()+'-'+tomonth+'-'+todate;
     console.log(departDate);
-    console.log(arrivalDate);
-
-    kafka.make_request('FlightSearch_topic',{"placefrom":flightPlace,"placeto":flightToPlace,"departdate":departDate,"arrivaldate":arrivalDate}, function(err,results){
+    var adultCount=req.param('adultCount');
+    var childCount=req.param('childCount');
+    var seniorsCount=req.param('seniorsCount');
+    var flightCabin=req.param('flightCabin');
+    console.log(seniorsCount);
+    console.log(childCount);
+    console.log(adultCount);
+    console.log(flightCabin);
+    kafka.make_request('FlightSearch_topic',{"placefrom":flightPlace,"placeto":flightToPlace,"departdate":departDate,"arrivaldate":arrivalDate,"adultCount":adultCount,"childCount":childCount,"seniorsCount":seniorsCount,"flightCabin":flightCabin}, function(err,results){
         console.log('in result');
-        //console.log(results);
+        console.log(results);
         console.log(results.code);
         if(err){
             res.status(401).send();
@@ -281,7 +452,7 @@ app.get('/flightDetails',function(req, res) {
         else
         {
             if(results.code == 200){
-                console.log(results.arr)
+                console.log(results.arr);
                 return res.status(200).send(results.arr);
             }
             else {
@@ -331,6 +502,63 @@ app.post('/AddFlightListing',function(req, res) {
     var departDate=from.getFullYear()+'-'+fmonth+'-'+fdate;
     var arrivalDate=to.getFullYear()+'-'+tomonth+'-'+todate;
     kafka.make_request('AddFlightListing_topic',{"FlightId":req.body.FlightId,"Operator":req.body. FilghtOperator,"depttime":req.body.FilghtDepTime,"departdate":departDate,"arrivaltime":req.body.FilghtArrTime,"arrivaldate":arrivalDate,"placefrom":flightPlace,"placeto":flightToPlace}, function(err,results){
+        console.log('---------------');
+        console.log(results);
+        console.log('---------------');
+        if(err){
+            res.status(401).send();
+        }
+        else
+        {
+            if(results.code == 201){
+                return res.status(204).send();
+            }
+            else {
+                res.status(401).send();
+            }
+        }
+    });
+});
+
+app.post('/UpdateFlightListing',function(req, res) {
+    console.log(req.body)
+    var flightP=req.body.FLightOrigin;
+    var flightSmall=flightP.substr(1).toLowerCase();
+    var flightPlace=flightP.charAt(0).toUpperCase()+flightSmall;
+
+
+    var flightto=req.body.FLightDest;
+    var flighttoSmall=flightto.substr(1).toLowerCase();
+    var flightToPlace=flightto.charAt(0).toUpperCase()+flighttoSmall;
+
+
+    // var to=new Date(req.body.FilghtArrDate);
+    // var from=new Date(req.body.FilghtDepDate);
+    // //var hotelsDateFrom=from.toString().split('T');
+    // console.log('--------------');
+    // var fmonth=from.getMonth()+1;
+    // var tomonth=to.getMonth()+1;
+    // if(fmonth<10)
+    // {
+    //     fmonth='0'+fmonth;
+    // }
+    // if(tomonth<10)
+    // {
+    //     tomonth='0'+tomonth;
+    // }
+    // var fdate=from.getDate();
+    // if(from.getDate()<10)
+    // {
+    //     fdate='0'+fdate;
+    // }
+    // var todate=to.getDate();
+    // if(to.getDate()<10)
+    // {
+    //     todate='0'+todate;
+    // }
+    // var departDate=from.getFullYear()+'-'+fmonth+'-'+fdate;
+    // var arrivalDate=to.getFullYear()+'-'+tomonth+'-'+todate;
+    kafka.make_request('UpdateFlightListing_topic',{"InitialFlightId":req.body.InitialFlightId,"FlightId":req.body.FlightId,"Operator":req.body.FilghtOperator,"depttime":req.body.FilghtDepTime,"departdate":req.body.FilghtDepDate,"arrivaltime":req.body.FilghtArrTime,"arrivaldate":req.body.FilghtArrDate,"placefrom":flightPlace,"placeto":flightToPlace}, function(err,results){
         console.log('---------------');
         console.log(results);
         console.log('---------------');
@@ -400,9 +628,78 @@ app.post('/AddCarListing',function(req, res) {
     });
 });
 
+app.post('/UpdateCarListing',function(req, res) {
+
+    var CarT=req.body.CarPlace;
+    var carSmall=CarT.substr(1).toLowerCase();
+    var carPlace=CarT.charAt(0).toUpperCase()+carSmall;
+
+
+    var from=new Date(req.body.carsDatePickUp);
+    var to=new Date(req.body.carsDateDropOff);
+
+    var fmonth=from.getMonth()+1;
+    var tomonth=to.getMonth()+1;
+    if(fmonth<10)
+    {
+        fmonth='0'+fmonth;
+    }
+    if(tomonth<10)
+    {
+        tomonth='0'+tomonth;
+    }
+    var fdate=from.getDate();
+    if(from.getDate()<10)
+    {
+        fdate='0'+fdate;
+    }
+    var todate=to.getDate();
+    if(to.getDate()<10)
+    {
+        todate='0'+todate;
+    }
+    var carsDatePickUp=from.getFullYear()+'-'+fmonth+'-'+fdate;
+    var carsDateDropOff=to.getFullYear()+'-'+tomonth+'-'+todate;
+    kafka.make_request('UpdateCarListing_topic',{"InitialCarId":req.body.InitialCarId,"CarId":req.body.CarId,"CarType":req.body.CarType,"CarPlace":carPlace,"carsDatePickUp":carsDatePickUp,"carsDateDropOff":carsDateDropOff,"CarPrice":req.body.CarPrice,"CarPeople":req.body.CarPeople,"CarDoors":req.body.CarDoors,"CarBags":req.body.CarBags}, function(err,results){
+
+        if(err){
+            res.status(401).send();
+        }
+        else
+        {
+            if(results.code == 201){
+                return res.status(204).send();
+            }
+            else {
+                res.status(401).send();
+            }
+        }
+    });
+});
+
+
+app.post('/UpdateHotelListing',function (req,res) {
+    var hoteldetails=req.body;
+    console.log(hoteldetails);
+    kafka.make_request('UpdateHotelListing_topic',hoteldetails,function (err,results) {
+        if(results.length>0){
+            res.status(201).send();
+        }
+        else if(results.code===401){
+            res.status(409).send();
+        }
+        else
+        {
+            res.status(401).send();
+        }
+    })
+
+
+});
+
 app.post('/addHotelListing',function (req,res) {
-   var hoteldetails=req.body;
-  console.log(hoteldetails);
+    var hoteldetails=req.body;
+    console.log(hoteldetails);
     kafka.make_request('addHotelListing',hoteldetails,function (err,results) {
         //var out=[];
         //var state={};
@@ -431,23 +728,23 @@ app.get('/getHotelDetails',function(req, res) {
     var from=new Date(req.param('hotelsDateFrom'));
     var to=new Date(req.param('hotelsDateTo'));
 
-     //var hotelsDateFrom=from.toString().split('T');
+    //var hotelsDateFrom=from.toString().split('T');
     console.log('--------------');
     var fmonth=from.getMonth()+1;
     var tomonth=to.getMonth()+1;
-if(fmonth<10)
-{
-    fmonth='0'+fmonth;
-}
-if(tomonth<10)
-{
-    tomonth='0'+tomonth;
-}
-var fdate=from.getDate();
-if(from.getDate()<10)
-{
-    fdate='0'+fdate;
-}
+    if(fmonth<10)
+    {
+        fmonth='0'+fmonth;
+    }
+    if(tomonth<10)
+    {
+        tomonth='0'+tomonth;
+    }
+    var fdate=from.getDate();
+    if(from.getDate()<10)
+    {
+        fdate='0'+fdate;
+    }
     var todate=to.getDate();
     if(to.getDate()<10)
     {
@@ -460,41 +757,60 @@ if(from.getDate()<10)
     //  var hotelsDateTo=to.split('T');
     var hotelP=req.param('hotelPlace');
     var hotelPlace=hotelP.charAt(0).toUpperCase()+hotelP.substr(1);
-
     console.log(hotelPlace);
     console.log('------------------');
     kafka.make_request('gethoteldetails',{"City":hotelPlace,"hotelsDateTo":t,"hotelsDateFrom":f}, function(err,results){
         console.log('in result');
         console.log(results);
         //console.log(results.code);
-            if(results.length> 0){
-               // console.log(results.arr);
-                res.send(results);
-            }
+        if(results.length> 0){
+            // console.log(results.arr);
+            res.send(results);
+        }
     });
 });
 
+app.post('/makePayment', function (req,res) {
+    console.log(req.body.id);
+    console.log(req.body);
+    var paymentDetails=req.body;
+    paymentDetails.username=req.session.user;
+    console.log(paymentDetails);
+    kafka.make_request('makePayment_topic',paymentDetails,function (err,results) {
+
+        if(results.code==200){
+            res.status(201).send();
+        }
+        else {
+            res.status(401).send();
+        }
+    })
+
+});
+
+
+
 app.post('/hotelDetails', function (req,res) {
-var hotelsDateFrom=req.body.hotelsDateFrom.split('T');
-var hotelsDateTo=req.body.hotelsDateTo.split('T');
+    var hotelsDateFrom=req.body.hotelsDateFrom.split('T');
+    var hotelsDateTo=req.body.hotelsDateTo.split('T');
 //var hotelsDateFrom=new Date(hotelsDateF[0]);
 //console.log(hotelsDateFrom[0]);
 
-var hotelP=req.body.hotelPlace;
- var hotelPlace=hotelP.charAt(0).toUpperCase()+hotelP.substr(1);
-     console.log(hotelPlace);
- console.log("asdddddddd");
-kafka.make_request('postHotelDetails',{"City":hotelPlace,"hotelsDateFrom":hotelsDateFrom[0],"hotelsDateTo":hotelsDateTo[0]},function (err,results) {
-    //var out=[];
-    //var state={};
-    //out.push(results);
-    if(results.length>0){
-        res.status(201).send();
-    }
-    else {
-        res.status(401).send();
-    }
-})
+    var hotelP=req.body.hotelPlace;
+    var hotelPlace=hotelP.charAt(0).toUpperCase()+hotelP.substr(1);
+    console.log(hotelPlace);
+    console.log("asdddddddd");
+    kafka.make_request('postHotelDetails',{"City":hotelPlace,"hotelsDateFrom":hotelsDateFrom[0],"hotelsDateTo":hotelsDateTo[0]},function (err,results) {
+        //var out=[];
+        //var state={};
+        //out.push(results);
+        if(results.length>0){
+            res.status(201).send();
+        }
+        else {
+            res.status(401).send();
+        }
+    })
 });
 
 
@@ -557,28 +873,72 @@ app.get('/GetPageStats',function(req, res) {
 });
 
 
+app.get('/BookingCountGraph',function(req, res) {
+    kafka.make_request('BookingCountGraph_topic',{"User":req.session.user}, function(err,results){
+        console.log('in result');
+
+        if(err){
+            res.status(401).send();
+        }
+        else
+        {
+            if(results.code == 200){
+                console.log(results.arr);
+                return res.status(200).send(results.arr);
+            }
+            else {
+                res.status(401).send();
+            }
+        }
+    });
+});
+
+
+app.get('/RevenueGraph',function(req, res) {
+    kafka.make_request('RevenueGraph_topic',{"User":req.session.user}, function(err,results){
+        console.log('in result');
+
+        if(err){
+            res.status(401).send();
+        }
+        else
+        {
+            if(results.code == 200){
+                console.log(results.arr);
+                return res.status(200).send(results.arr);
+            }
+            else {
+                res.status(401).send();
+            }
+        }
+    });
+});
+
+
 app.post('/signup', function(req, res) {
-  //console.log("signup req: "+req.body.username+req.bodyfirstname);
-  kafka.make_request('signuptopic',{  "username":req.body.username,"password":req.body.password,"firstname":req.body.firstname,"lastname":req.body.lastname}, function(err,results){
-      console.log('in result - signup strategy - passport.js');
-      console.log("results code - in signup strayegy: "+results.code);
-      if(err){
-          done(err,{});
-      }
-      else {
-        if(results.code === 200){
-                  res.status(201).send();
-          }
-          else if(results.code === 401){
-              console.log("passport.js - signup failed - user document not inserted ");
-                  res.status(401).send();
-          }
-          else if(results.code === 500){
-              console.log("passport.js - signup failed - user document not inserted ");
-                  res.status(500).send();
-          }
-      }
-  });
+    //console.log("signup req: "+req.body.username+req.bodyfirstname);
+    kafka.make_request('signuptopic',{  "username":req.body.username,"password":req.body.password,"firstname":req.body.firstname,"lastname":req.body.lastname}, function(err,results){
+        console.log('in result - signup strategy - passport.js');
+        console.log("results code - in signup strayegy: "+results.code);
+
+        console.log(results);
+        if(err){
+            done(err,{});
+        }
+        else {
+            if(results.code == 200){
+                res.status(200).send();
+            }
+            else if(results.code == 401){
+                console.log("passport.js - signup failed - user document not inserted ");
+                res.status(401).send();
+            }
+            else if(results.code == 500){
+                console.log("passport.js - signup failed - user document not inserted ");
+                res.status(500).send();
+            }
+        }
+    });
     // passport.authenticate('signup', function(err, user) {
     //     if(err) {
     //         res.status(500).send();
