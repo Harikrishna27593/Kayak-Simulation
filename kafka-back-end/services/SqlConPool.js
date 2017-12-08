@@ -10,11 +10,13 @@ function handle_request(query,callback)
 {
     pool.getConnection(function (err,connection) {
         connection.query(query,function (err,result) {
-
+// console.log(query);
             //console.log(err);
+
+//            console.log("INSIDE POOL");
             if(!err)
             {
-                console.log("connection");
+            //    console.log("connection");
                 callback(result,null)
             }
             else

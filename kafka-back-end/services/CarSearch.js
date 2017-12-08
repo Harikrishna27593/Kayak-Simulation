@@ -16,36 +16,51 @@ function handle_request(msg, callback){
     var res = {};
     var i=0;
     try {
-        console.log("In handle request:"+ JSON.stringify(msg));
-        var queryJson={Place: msg.place};
-       MongoConPool.find('CarListings',queryJson,function(err, cars){
-                if (err) {
-                    res.code = "401";
-                    res.value = "Car details fetch unsuccessful";
-                    callback(null, res);
-                }
-                else {
-                    var resArr = [];
-                    resArr = cars.map(function (file) {
-                        var carsJSON = {};
-                        carsJSON.id=cars[i].CarId;
-                        carsJSON.carType = cars[i].CarType;
-                        // carsJSON.carName=cars[i].CarName;
-                        carsJSON.peopleCount=cars[i].People;
-                        carsJSON.bagCount=cars[i].Bags;
-                        carsJSON.doorCount=cars[i].Doors;
-                        carsJSON.carPrice=cars[i].Price;
-                        // carsJSON.carCompany=cars[i].CarCompany;
-                        i=i+1;
-                        return carsJSON;
+        console.log("In handle request:" + JSON.stringify(msg));
+        var queryJson = {Place: msg.place};
+        MongoConPool.find('CarListings', queryJson, function (err, cars) {
+            if (err) {
+                res.code = "401";
+                res.value = "Car details fetch unsuccessful";
+                callback(null, res);
+            }
+            else {
+                var resArr = [];
+                resArr = cars.map(function (file) {
+                    var carsJSON = {};
+                    carsJSON.id = cars[i].CarId;
+                    carsJSON.carType = cars[i].CarType;
+                    carsJSON.carPlace = cars[i].Place;
+                    carsJSON.peopleCount = cars[i].People;
+                    carsJSON.bagCount = cars[i].Bags;
+                    carsJSON.doorCount = cars[i].Doors;
+                    carsJSON.carPrice = cars[i].Price;
+                    carsJSON.Company=cars[i].Company;
+                    i = i + 1;
+                    return carsJSON;
+                });
+                res.code = "200";
+                res.value = "CarListing Successful";
+                res.arr = resArr;
+                //        console.log(resArr);
+
+                if (msg.user!=undefined) {
+
+                    MongoConPool.insert("UserTracking",{username: msg.user,Pagename:"Car Listings",sessionid:msg.sid,Date:new Date()}, function (err, user) {
+                        if (user.insertedCount > 0) {
+
+
+                        } else {
+
+                        }
+
                     });
-                    res.code = "200";
-                    res.value = "CarListing Successful";
-                    res.arr=resArr;
-            //        console.log(resArr);
-                    callback(null, res);
                 }
-            });
+
+                callback(null, res);
+            }
+        });
+
     }
     catch (e){
         res.code = "401";

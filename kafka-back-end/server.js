@@ -1,5 +1,7 @@
 var connection =  new require('./kafka/Connection');
 var winston = require('winston');
+var MongoConPool=require("./services/MongoConPool");
+
 var login = require('./services/login');
 var signup = require('./services/signup');
 var hoteldetails=require('./services/hotelDetails');
@@ -24,6 +26,15 @@ var UpdateHotelListing= require('./services/UpdateHotelListing');
 var DeleteUser= require('./services/DeleteUser');
 var BookingCountGraph = require('./services/BookingCountGraph');
 var RevenueGraph = require('./services/RevenueGraph');
+var TopFlightStats = require('./services/TopFlightStats');
+var TopHotelStats = require('./services/TopHotelStats');
+var TopCarStats = require('./services/TopCarStats');
+var CitywiseRevenue = require('./services/CitywiseRevenue');
+var UpdateUserInfo = require('./services/UpdateUserInfo');
+var UserTrackingGraph = require('./services/UserTrackingGraph');
+
+
+
 
 var bcrypt = require('bcryptjs');
 
@@ -110,6 +121,41 @@ var consumer27=connection.getConsumer(topic_name_27);
 
 var topic_name_28='RevenueGraph_topic';
 var consumer28=connection.getConsumer(topic_name_28);
+
+
+var topic_name_29='TopFlightStats_topic';
+var consumer29=connection.getConsumer(topic_name_29);
+
+var topic_name_30='TopHotelStats_topic';
+var consumer30=connection.getConsumer(topic_name_30);
+
+var topic_name_31='TopCarStats_topic';
+var consumer31=connection.getConsumer(topic_name_31);
+
+var topic_name_32='CitywiseRevenue_topic';
+var consumer32=connection.getConsumer(topic_name_32);
+
+var topic_name_33='UpdateUserInfo_topic';
+var consumer33=connection.getConsumer(topic_name_33);
+
+
+var topic_name_34='AdminSearchPaymentsID_topic';
+var consumer34=connection.getConsumer(topic_name_34);
+
+
+var topic_name_35='getAdmin_topic';
+var consumer35=connection.getConsumer(topic_name_35);
+
+var topic_name_36='getUserProfile_topic';
+var consumer36=connection.getConsumer(topic_name_36);
+
+var topic_name_37='UserTrackingGraph_topic';
+var consumer37=connection.getConsumer(topic_name_37);
+
+var topic_name_38='getCardDetails_topic';
+var consumer38=connection.getConsumer(topic_name_38);
+
+
 
 
 var producer = connection.getProducer();
@@ -327,9 +373,9 @@ consumer2.on('message', function (message) {
         else
         {
             console.log("INSIDE ELSE");
-            query1="insert into KayakUsers values ('"+data.data.username+"','','','','','',0,'','"+newpass+"','No')";
+            query1="insert into KayakUsers values ('"+data.data.username+"','','','','','',0,'','"+newpass+"','No','')";
             SqlConPool.handle_request(query1,function (result1,error) {
-                console.log(result1);
+                console.log(error);
                 if(error)
                 {
 
@@ -642,9 +688,9 @@ consumer14.on('message', function (message) {
 });
 
 
-
 consumer15.on('message', function (message) {
     console.log('message received in consumer14 - server.js');
+    console.log(JSON.stringify(message.value));
     console.log(JSON.stringify(message.value));
     var data = JSON.parse(message.value);
     console.log("-----------------------");
@@ -662,6 +708,19 @@ consumer15.on('message', function (message) {
         mm = '0'+mm
     }
     today = yyyy+'-'+mm + '-' + dd ;
+
+
+    if (data.data.username!=undefined) {
+        MongoConPool.insert("UserTracking",{username: data.data.username,Pagename:"Payment page",sessionid:data.data.sid,Date:new Date()}, function (err, user) {
+            if (user.insertedCount > 0) {
+
+            } else {
+
+            }
+        });
+
+    }
+
 
     var paymentquery="";
     var bookingquery="";
@@ -692,11 +751,39 @@ consumer15.on('message', function (message) {
 
     }
 
+    else if(data.data.category=="hotel")
+    {
+
+
+        var hotelsDateFrom=new Date(data.data.hotelsDateFrom.substr(0, 10));
+        var hotelsDateTo=new Date(data.data.hotelsDateTo.substr(0, 10));
+        var timeDiff1 = Math.abs(hotelsDateTo.getTime() - hotelsDateFrom.getTime());
+        var diffDay = Math.ceil(timeDiff1 / (1000 * 3600 * 24));
+        console.log("------------date DIFF in hotels");
+        console.log(diffDay);
+        console.log("------------date DIFF in hotels");
+        if(diffDay>0)
+            var price=diffDay*data.data.price*data.data.hotelsRoomsCount;
+        else
+            var price=data.data.price*data.data.hotelsRoomsCount;
+        console.log("-----------------%%%%%%%%%%%%%%%%%%_______");
+        console.log("ANJAY");
+        console.log("-----------------%%%%%%%%%%%%%%%%%%_______");
+        paymentquery = "insert into PaymentDetails(itemId,category,username,amount,paymentDate,cardDetails) values('" + data.data.id + "','" + data.data.category + "','" + data.data.username + "','" + price + "','" + today + "','" + data.data.cardDetails + "')";
+updateUsers="update kayakusers set creditcard='" + data.data.cardDetails + "' where username= '" + data.data.username + "' ";
+
+SqlConPool.handle_request(updateUsers,function (output,error) {
+
+    console.log("updated credit card");
+
+})
+    }
+
     SqlConPool.handle_request(paymentquery, function (result, error) {
         console.log(result.insertId);
         if(data.data.category=="car")
         {
-            bookingquery="insert into carBooking(PaymentId,CarPickUp,carDropOff,carPlace) values('"+result.insertId+"','"+carsPickUP+"','"+carsDropOff+"','"+data.data.carPickupPlace+"')";
+            bookingquery="insert into carBooking(PaymentId,CarPickUp,carDropOff,carPlace,Company) values('"+result.insertId+"','"+carsPickUP+"','"+carsDropOff+"','"+data.data.carPickupPlace+"','"+data.data.Company+"')";
         }
 
         else if(data.data.category=="flight")
@@ -705,7 +792,16 @@ consumer15.on('message', function (message) {
             bookingquery="insert into flightBooking(PaymentId,departure,arrival,origin,destination,passengerCount,type,journey,flightsDateFrom,operator) values('"+result.insertId+"','"+data.data.departureTime+"','"+data.data.arrivalTime+"','"+data.data.origin+"', '"+data.data.destination+"', '"+data.data.count+"', '"+data.data.type+"', '"+data.data.journey+"','"+flightsDateFrom[0]+"','"+data.data.operator+"')";
             console.log(bookingquery);
         }
-
+        else if(data.data.category=="hotel")
+        {
+            var hotelsDateFrom=data.data.hotelsDateFrom.substr(0, 10);
+            var hotelsDateTo=data.data.hotelsDateTo.substr(0, 10);
+            console.log('-----------hoteldate from');
+            console.log(data.data.name);
+            var name=data.data.name;
+            console.log('-----------hoteldate from');
+            bookingquery="insert into hotelBooking(PaymentId,hotelsDateFrom,hotelsDateTo,price,City,Name,hotelsRoomcount,hotelsAdultscount,hotelschildcount,hotelsRoomType) values('"+result.insertId+"','"+hotelsDateFrom+"','"+hotelsDateTo+"','"+data.data.price+"','"+data.data.City+"','"+name+"','"+data.data.hotelsRoomsCount+"','"+data.data.hotelAdultsCount+"','"+data.data.hotelChildCount+"','"+data.data.hotelsRoomType+"')"
+        }
         SqlConPool.handle_request(bookingquery,function (result1,err) {
             console.log(result1);
             res.code=200;
@@ -725,13 +821,8 @@ consumer15.on('message', function (message) {
             return;
         });
     });
-    winston.remove(winston.transports.Console);
-    winston.add(winston.transports.File, { filename: './public/LogFiles/KayakAnalysis.json' });
-    winston.log('info', 'Payment Page Viewed', { page_name : 'Payment_page'});
-
-    winston.remove(winston.transports.File);
-    winston.add(winston.transports.Console);
 });
+
 
 
 consumer16.on('message', function (message) {
@@ -930,7 +1021,7 @@ consumer24.on('message', function (message) {
 //console.log(today);
     //var getDetails="select * from paymentdetails P,carBooking C,flightBooking F where P.PaymentId=C.PaymentId or P.PaymentId=F.paymentId and paymentDate < '"+today+"' and username='"+data.data.username+"'";
     var output=[];
-    var getDetails="select * from paymentdetails P,carBooking C where P.PaymentId=C.PaymentId and P.paymentDate < '2017-11-27' and P.username='"+data.data.username+"'";
+    var getDetails="select * from paymentdetails P,carBooking C where P.PaymentId=C.PaymentId and P.paymentDate < '"+today+"' and P.username='"+data.data.username+"'";
     SqlConPool.handle_request(getDetails,function (result1,err) {
 
         for(var i=0;i<result1.length;i++)
@@ -943,26 +1034,37 @@ consumer24.on('message', function (message) {
             {
                 output.push(result2[i]);
             }
-            var payloads = [
-                {
-                    topic: data.replyTo,
-                    messages: JSON.stringify({
-                        correlationId: data.correlationId,
-                        data: output
-                    }),
-                    partition: 0
+            var getHotelDetails="select * from paymentdetails P,hotelBooking C where P.PaymentId=C.PaymentId and P.paymentDate < '"+today+"' and P.username='"+data.data.username+"'";
+            SqlConPool.handle_request(getHotelDetails,function (result3,err) {
+                for (var i = 0; i < result3.length; i++) {
+                    output.push(result3[i]);
                 }
-            ];
-            producer.send(payloads, function (err, data) {
-                // console.log(data);
-            });
-            return;
+               // console.log(output);
+                var payloads = [
+                    {
+                        topic: data.replyTo,
+                        messages: JSON.stringify({
+                            correlationId: data.correlationId,
+                            data: output
+                        }),
+                        partition: 0
+                    }
+                ];
+                producer.send(payloads, function (err, data) {
+                    // console.log(data);
+                });
+                return;
+            })
+
         });
+
+
     });
 });
 
 
 consumer25.on('message', function (message) {
+
     console.log('message received in consumer 25 - server.js');
     console.log(JSON.stringify(message.value));
     var data = JSON.parse(message.value);
@@ -977,14 +1079,15 @@ consumer25.on('message', function (message) {
         mm = '0' + mm
     }
     today = yyyy + '-' + mm + '-' + dd;
-//console.log(today);
+
+    //console.log(today);
+
     //var getDetails="select * from paymentdetails P,carBooking C,flightBooking F where P.PaymentId=C.PaymentId or P.PaymentId=F.paymentId and paymentDate < '"+today+"' and username='"+data.data.username+"'";
+
     var output = [];
     var getDetails = "select * from paymentdetails P,carBooking C where P.PaymentId=C.PaymentId and C.carPickUp > '" + today + "' and P.username='" + data.data.username + "'";
     SqlConPool.handle_request(getDetails, function (result1, err) {
-
         for (var i = 0; i < result1.length; i++) {
-
             output.push(result1[i]);
         }
         var getFlightDetails = "select * from paymentdetails P,flightBooking C where P.PaymentId=C.PaymentId and C.flightsDateFrom > '" + today + "' and P.username='" + data.data.username + "'";
@@ -993,20 +1096,27 @@ consumer25.on('message', function (message) {
 
                 output.push(result2[i]);
             }
-            var payloads = [
-                {
-                    topic: data.replyTo,
-                    messages: JSON.stringify({
-                        correlationId: data.correlationId,
-                        data: output
-                    }),
-                    partition: 0
+            var getHotelDetails = "select * from paymentdetails P,hotelbooking C where P.PaymentId=C.PaymentId and C.hotelsDateFrom> '" + today + "' and P.username='" + data.data.username + "'";
+            SqlConPool.handle_request(getHotelDetails, function (result3, err) {
+                for (var i = 0; i < result3.length; i++) {
+                    output.push(result3[i]);
                 }
-            ];
-            producer.send(payloads, function (err, data) {
-                // console.log(data);
+                //console.log(output);
+                var payloads = [
+                    {
+                        topic: data.replyTo,
+                        messages: JSON.stringify({
+                            correlationId: data.correlationId,
+                            data: output
+                        }),
+                        partition: 0
+                    }
+                ];
+                producer.send(payloads, function (err, data) {
+                    // console.log(data);
+                });
+                return;
             });
-            return;
         });
     });
 });
@@ -1095,6 +1205,268 @@ consumer28.on('message', function (message) {
         ];
         producer.send(payloads, function(err, data){
             console.log(data);
+        });
+        return;
+    });
+});
+
+consumer29.on('message', function (message) {
+    console.log('message received in consumer29 - server.js');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    TopFlightStats.handle_request(data.data, function(err,res){
+        console.log('after handle in server.js '+ res.value);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+consumer30.on('message', function (message) {
+    console.log('message received in consumer30 - server.js');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    TopHotelStats.handle_request(data.data, function(err,res){
+        console.log('after handle in server.js '+ res.value);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+consumer31.on('message', function (message) {
+    console.log('message received in consumer31 - server.js');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    TopCarStats.handle_request(data.data, function(err,res){
+        console.log('after handle in server.js '+ res.value);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+
+consumer32.on('message', function (message) {
+    console.log('message received in consumer32 - server.js');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    CitywiseRevenue.handle_request(data.data, function(err,res){
+        console.log('after handle in server.js '+ res.value);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+consumer33.on('message', function (message) {
+    console.log('message received in consumer33 - server.js');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    UpdateUserInfo.handle_request(data.data, function(err,res){
+        console.log('after handle in server.js '+ res.value);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+
+
+
+consumer34.on('message',function (message) {
+    console.log('message received in consumer 34 - server.js');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    console.log('-------------');
+
+    var getPaymentDetails="select * from paymentdetails where PaymentId='"+data.data.paymentId+"'";
+    SqlConPool.handle_request(getPaymentDetails,function (result2,err) {
+        var payloads = [
+            {
+                topic: data.replyTo,
+                messages: JSON.stringify({
+                    correlationId: data.correlationId,
+                    data: result2
+                }),
+                partition: 0
+            }
+        ];
+        producer.send(payloads, function (err, data) {
+            // console.log(data);
+        });
+        return;
+    });
+    //console.log(d);
+    console.log('-------------');
+});
+
+
+
+
+consumer35.on('message',function (message) {
+    console.log('message received in consumer 35 - server.js');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    console.log('-------------');
+
+    var getuserDetails="select isAdmin from kayakusers where isAdmin='yes' and username='"+data.data.username+"'";
+    SqlConPool.handle_request(getuserDetails,function (result2,err) {
+var res={};
+
+        if(result2.length!=0)
+        {
+res.code=200;
+        }
+        else
+        {
+            res.code=401;
+        }
+
+        console.log(res);
+
+        var payloads = [
+            {
+                topic: data.replyTo,
+                messages: JSON.stringify({
+                    correlationId: data.correlationId,
+                    data: res
+                }),
+                partition: 0
+            }
+        ];
+        producer.send(payloads, function (err, data) {
+            // console.log(data);
+        });
+        return;
+    });
+    //console.log(d);
+});
+
+
+consumer36.on('message',function (message) {
+    console.log('message received in consumer 36 - server.js');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    console.log('-------------');
+
+    var getuserDetails="select * from kayakusers where username='"+data.data.username+"'";
+    SqlConPool.handle_request(getuserDetails,function (result2,err) {
+        var payloads = [
+            {
+                topic: data.replyTo,
+                messages: JSON.stringify({
+                    correlationId: data.correlationId,
+                    data: result2
+                }),
+                partition: 0
+            }
+        ];
+        producer.send(payloads, function (err, data) {
+            // console.log(data);
+        });
+        return;
+    });
+});
+
+
+
+
+consumer37.on('message', function (message) {
+    console.log('message received in consumer37 - server.js');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    UserTrackingGraph.handle_request(data.data, function(err,res){
+        console.log('after handle in server.js '+ res.value);
+        var payloads = [
+            { topic: data.replyTo,
+                messages:JSON.stringify({
+                    correlationId:data.correlationId,
+                    data : res
+                }),
+                partition : 0
+            }
+        ];
+        producer.send(payloads, function(err, data){
+            console.log(data);
+        });
+        return;
+    });
+});
+
+
+
+
+consumer38.on('message',function (message) {
+    console.log('message received in consumer 38 - server.js');
+    console.log(JSON.stringify(message.value));
+    var data = JSON.parse(message.value);
+    console.log('-------------');
+
+    var getuserDetails="select * from kayakusers where username='"+data.data.username+"'";
+    SqlConPool.handle_request(getuserDetails,function (result2,err) {
+        var payloads = [
+            {
+                topic: data.replyTo,
+                messages: JSON.stringify({
+                    correlationId: data.correlationId,
+                    data: result2
+                }),
+                partition: 0
+            }
+        ];
+        producer.send(payloads, function (err, data) {
+            // console.log(data);
         });
         return;
     });
