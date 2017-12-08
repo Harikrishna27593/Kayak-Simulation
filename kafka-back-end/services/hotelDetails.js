@@ -1,6 +1,7 @@
 var mongo = require("./mongo");
 var mongoURL = "mongodb://localhost:27017/KAYAK";
 var winston = require('winston');
+var MongoConPool=require("./MongoConPool");
 function hotel_details(msg, callback){
     var res = {};
     console.log("In handle request:"+ JSON.stringify(msg));
@@ -33,12 +34,58 @@ function gethoteldetails(msg, callback){
         var from=msg.hotelsDateFrom;
         var to=msg.hotelsDateTo;
         var coll = mongo.collection('HotelListings');
-        coll.find({City: msg.City, hotelsDateFrom: {$gte:from},hotelsDateTo: {$lt:to}}).toArray( function(err, hotel){
+        coll.find({City: msg.City, hotelsDateFrom: {$lt:from},hotelsDateTo: {$gte:to}}).toArray( function(err, hotel){
+
+//            coll.find({City: msg.City}).toArray( function(err, hotel){
             res=hotel;
 //console.log(res.length);
-            callback(null, res);
+            var output=[];
+            for(var i=0;i<hotel.length;i++)
+            {
+                var resJson={};
+                resJson.Address=hotel[i].Address;
+                resJson.City=hotel[i].City;
+                resJson.Name=hotel[i].Name;
+                resJson.Ratings=hotel[i].Ratings;
+                resJson.Reviews=hotel[i].Reviews;
+                resJson.Rooms=hotel[i].Rooms;
+                resJson.hotelId=hotel[i].hotelId;
+                resJson.hotelsDateFrom=hotel[i].hotelsDateFrom;
+                resJson.Ratings=hotel[i].Ratings;
+                resJson.hotelsDateTo=hotel[i].hotelsDateTo;
+
+                if(msg.roomsType=='Single')
+                {
+                    resJson.price=hotel[i].Rooms.singleRoomPrice;
+                }
+                else if(msg.roomsType=='Double')
+                {
+                    resJson.price=hotel[i].Rooms.doubleRoomPrice;
+                }
+                else
+                {
+                    resJson.price=hotel[i].Rooms.suitRoomPrice;
+                }
+                resJson.roomsType=msg.roomsType;
+
+                output.push(resJson);
+
+            }
+            if (msg.user!=undefined) {
+                MongoConPool.insert("UserTracking",{username: msg.user,Pagename:"Hotel Listings",sessionid:msg.sid,Date:new Date()}, function (err, user) {
+                    if (user.insertedCount > 0) {
+
+                    } else {
+
+                    }
+                });
+
+            }
+            callback(null, output);
+
         });
     });
+
     winston.remove(winston.transports.File);
     winston.add(winston.transports.Console);
 }

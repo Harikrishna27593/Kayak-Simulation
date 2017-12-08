@@ -2,7 +2,8 @@ var MongoConPool=require("./MongoConPool");
 function handle_request(msg, callback){
     var res = {};
     var queryJson={CarId: msg.CarId, CarType:msg.CarType,Place:msg.CarPlace,PickUp:msg.carsDatePickUp ,DropOff:msg.carsDateDropOff,Price: msg.CarPrice,People:msg.CarPeople, Bags:msg.CarBags,Doors:msg.CarDoors};
-    MongoConPool.findOne('CarListings',queryJson, function(err,car){
+    var queryJson2={CarId:msg.CarId};
+    MongoConPool.findOne('CarListings',queryJson2, function(err,car){
         if (car) {
             console.log("Car Listing Already Exists");
             res.code = "500";

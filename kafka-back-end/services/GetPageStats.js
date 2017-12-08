@@ -28,7 +28,7 @@ function handle_request(msg, callback) {
 
 
         for(var i = 0 ; i < results.file.length ; i++) {
-            console.log(results.file[i].page_name);
+           // console.log(results.file[i].page_name);
             if (results.file[i].page_name == "Cars_page") {
                 cars_page_count++;
             }

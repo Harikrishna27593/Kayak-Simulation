@@ -10,7 +10,7 @@ function handle_request(msg, callback){
                 case 'Hotel':
                     var coll = mongo.collection('HotelListings');
 
-                    coll.find({hotelId: msg.ID}).toArray( function(err,hotels){
+                    coll.find({hotelId: parseInt(msg.ID)}).toArray( function(err,hotels){
                         if (err) {
                             res.code = "401";
                             res.value = "Listing not available";
@@ -29,9 +29,17 @@ function handle_request(msg, callback){
                                 hotelsJSON.city=hotels[i].City;
                                 hotelsJSON.state=hotels[i].State;
                                 hotelsJSON.availability=hotels[i].Availability;
+                                hotelsJSON.singleRoomPrice=hotels[i].Rooms.singleRoomPrice;
+                                hotelsJSON.doubleRoomPrice=hotels[i].Rooms.doubleRoomPrice;
+                                hotelsJSON.suitRoomPrice=hotels[i].Rooms.suitRoomPrice;
                                 hotelsJSON.ratings=hotels[i].Ratings;
                                 hotelsJSON.reviews=hotels[i].Reviews;
+                                hotelsJSON.HotelsDateFrom=hotels[i].hotelsDateFrom;
+                                hotelsJSON.HotelsDateTo=hotels[i].hotelsDateTo;
                                 i=i+1;
+                                console.log('--------------');
+                                console.log(hotelsJSON);
+                                console.log('--------------');
                                 return hotelsJSON;
                             });
                             res.code = "200";
@@ -104,12 +112,13 @@ function handle_request(msg, callback){
                                 carsJSON.id=cars[i].CarId
                                 carsJSON.cartype = cars[i].CarType;
                                 carsJSON.place = cars[i].Place;
-                                // carsJSON.carName=cars[i].CarName;
+                                carsJSON.pickup = cars[i].PickUp;
+                                carsJSON.dropoff = cars[i].DropOff;
                                 carsJSON.peopleCount=cars[i].People;
                                 carsJSON.bagCount=cars[i].Bags;
                                 carsJSON.doorCount=cars[i].Doors;
                                 carsJSON.carPrice=cars[i].Price;
-                                // carsJSON.carCompany=cars[i].CarCompany;
+                                carsJSON.carcompany=cars[i].Company;
                                 i=i+1;
                                 return carsJSON;
 

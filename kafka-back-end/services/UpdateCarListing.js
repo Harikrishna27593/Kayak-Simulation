@@ -17,6 +17,8 @@ function handle_request(msg, callback) {
                 Bags: msg.CarBags,
                 Doors: msg.CarDoors
             };
+            console.log(msg.InitialCarId)
+            console.log(updateJson)
             coll.update({CarId: msg.InitialCarId}, {$set: updateJson}, function (err, cars) {
                 if (cars) {
                     console.log("Car Listing updated");

@@ -15,9 +15,10 @@ function handle_request(msg, callback){
         //         carsTimeDropOff: '2017-11-27T12:25:23.620Z' }
         // -----------------------
         var pickup=msg.pickupdate.split('T');
-//var pickupdate=new Date(pickup[0]);
+        var dropoff=msg.dropoffdate.split('T');
+        //var pickupdate=new Date(pickup[0]);
 
-        var queryJson={Place: msg.place,PickUp: pickup[0]};
+        var queryJson={Place: msg.place,PickUp: {$lte:pickup[0]},DropOff:{$gte:dropoff[0]} };
         MongoConPool.find('CarListings',queryJson,function(err, car){
             // In case of any error return
 

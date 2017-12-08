@@ -9,8 +9,12 @@ function handle_request(msg, callback){
             switch (msg.Type){
                 case 'Hotel':
                     var coll = mongo.collection('HotelListings');
-
+                    //console.log("HOTELS");
+                    console.log('------------');
+                    console.log(msg.ID);
+                    console.log('------------');
                     coll.find({hotelId: msg.ID}).toArray( function(err, Listing){
+
                         if (err) {
                             res.code = "401";
                             res.value = "Listing not available";
@@ -55,7 +59,7 @@ function handle_request(msg, callback){
                 case 'Car':
                     var coll = mongo.collection('CarListings');
 
-                    coll.find({CarId: msg.ID}).toArray( function(err, Listing){
+                    coll.find({CarId:msg.ID}).toArray( function(err, Listing){
                         if (err) {
                             res.code = "401";
                             res.value = "Listing not available";
