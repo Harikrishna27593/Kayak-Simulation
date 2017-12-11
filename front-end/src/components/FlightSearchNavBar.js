@@ -24,7 +24,6 @@ class SearchNavBar extends Component {
                           <button className="nav-item pr-4 nav-link btn-link  Text-big btn active" onClick={this.toHome}>Flights<span className="sr-only">(current)</span></button>
                           <button className="nav-item pr-4 nav-link btn-link  Text-big btn " onClick={this.toHome}>cars</button>
                           <button className="nav-item pr-4 nav-link btn-link  Text-big  btn" onClick={this.toHome}>Packages</button>
-                          <button className="nav-item pr-4 nav-link btn-link  Text-big btn" onClick={this.toHome}>Hotels</button>
                           <button className="nav-item pr-4 nav-link btn-link  Text-big btn" onClick={this.toHome}>Rentals</button>
                         </div>
                       </div>

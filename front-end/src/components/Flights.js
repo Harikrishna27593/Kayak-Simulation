@@ -3,26 +3,64 @@ import { Route, withRouter } from 'react-router-dom';
 import FlightSearchNavBar from "./FlightSearchNavBar";
 import FlightOptions from "./FlightOptions";
 import FlightCard from "./FlightCard";
-
+import EmptyResults from "./EmptyResults";
 class Flight extends Component {
   constructor(props) {
   super(props);
   this.state = {
     filterPrice:'',
      flightResults :[],
-      totalFlightsResults:[]
-  //   {'flightPrice':'455','from':'SFO','to':'DAL','Departure':'4:00 pm','Arrival':'2:00 am','img':'/images/united-flight.png','totalTime':'3h 20m','type':'nonstop','Airline':'United','flightID':'SEO456'},
-  //   {'flightPrice':'676','from':'MAA','to':'GHT','Departure':'4:33 pm','Arrival':'2:06 am','img':'/images/india-flight.png','totalTime':'16h 20m','type':'1 stop','Airline':'Air India','flightID':'FTU677'},
-  //   {'flightPrice':'777','from':'HTU','to':'JUK','Departure':'9:00 pm','Arrival':'7:00 am','img':'/images/hawaii-flight.png','totalTime':'7h 7m','type':'2 stops','Airline':'Hawaiian','flightID':'FGT654'},
-  // ],
+      totalFlightsResults:[],
+      emptyResults:false,
 }};
-  filterOption = (filterPrice) => {
-    console.log("filterPrice in Flights: "+filterPrice);
-    this.setState({filterPrice: filterPrice});
-      var priceFilterArray = this.state.totalFlightsResults.filter(val => {return val.flightPrice < filterPrice;});
-    console.log("After Filter: "+priceFilterArray);
-    this.setState({flightResults: priceFilterArray});
-  };
+    filterOption = (filterPrice) => {
+        console.log("filterPrice in Flights: "+filterPrice);
+        this.setState({filterPrice: filterPrice});
+        var priceFilterArray = this.state.totalFlightsResults.filter(val => {return val.flightPrice < filterPrice;});
+        if(priceFilterArray.length <= 0 ){
+            console.log("Empty array ");
+            this.setState({emptyResults: true});
+        }
+        else{
+            this.setState({emptyResults: false});
+        }
+        console.log("After Filter: "+priceFilterArray);
+        this.setState({flightResults: priceFilterArray});
+    };
+
+    filterOptionDep = (filterDep) => {
+        console.log("filterDep in Flights: "+filterDep);
+        console.log("filterDep in Flights: "+filterDep);
+        var DepFilterArray = this.state.totalFlightsResults.filter(val => {
+            return Date.parse('01/01/2011' + ' ' + filterDep) > Date.parse('01/01/2011' + ' ' + val.DepartureTime);
+        });
+        if(DepFilterArray.length <= 0 ){
+            console.log("Empty array ");
+            this.setState({emptyResults: true});
+        }
+        else{
+            this.setState({emptyResults: false});
+        }
+        console.log("After Filter: "+DepFilterArray);
+        this.setState({flightResults: DepFilterArray});
+    };
+
+    filterOptionArr = (filterArr) => {
+        console.log("filterArr in Flights: "+filterArr);
+        var ArrFilterArray = this.state.totalFlightsResults.filter(val => {
+            return Date.parse('01/01/2011' + ' ' + filterArr) > Date.parse('01/01/2011' + ' ' + val.ArrivalTime);
+        });
+        if(ArrFilterArray.length <= 0 ){
+            console.log("Empty array ");
+            this.setState({emptyResults: true});
+        }
+        else{
+            this.setState({emptyResults: false});
+        }
+        console.log("After Filter: "+ArrFilterArray);
+        this.setState({flightResults: ArrFilterArray});
+    };
+
     componentWillMount()
     {
         this.setState({
@@ -32,6 +70,16 @@ class Flight extends Component {
         console.log(this.state.FlightResults);
 
     }
+
+    flightPayment=(flightPaymentDetails)=>
+    {
+        alert("inside flights");
+        this.props.flightPayment(flightPaymentDetails);
+    };
+
+
+
+
     render() {
         return (
           <div className="container-fluid " style={{backgroundColor: '#E4E5EA'}}>
@@ -42,10 +90,17 @@ class Flight extends Component {
               <div className="d-flex flex-row">
                 <div className="d-flex flex-column">
                   <div className="pt-2 pr-2"><img src="/images/flight-map.png"/></div>
-                  <div className="pt-2 pr-2"><FlightOptions filterOption={this.filterOption}/></div>
+                  <div className="pt-2 pr-2"><FlightOptions filterOption={this.filterOption} filterOptionDep={this.filterOptionDep} filterOptionArr={this.filterOptionArr}/></div>
                 </div>
                 <div className="d-flex flex-column">
-                  <div className="pt-2 pr-2"><FlightCard flightResults={this.state.flightResults} filterPrice={this.state.filterPrice}/></div>
+                    <div className="pt-2 pr-2">
+                        {
+                            this.state.emptyResults
+                                ?<EmptyResults />
+                                : <FlightCard flightPayment={this.flightPayment} filterPrice={this.state.filterPrice} flightResults={this.state.flightResults} flightTotalCount={this.props.flightTotalCount} flightsDateFrom={this.props.flightsDateFrom} />
+
+                        }
+                    </div>
                 </div>
                 <div className="d-flex flex-column justify-content-end">
                   <div className="pt-2 pr-2"><img src="/images/flight-extra.png"/></div>
