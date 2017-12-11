@@ -10,6 +10,8 @@ import Dialog from 'material-ui/Dialog';
 import { Route, withRouter } from 'react-router-dom';
 import TextField from 'material-ui/TextField';
 import * as API from '../api/API';
+import swal from 'sweetalert';
+
 const customContentStyle = {
   width: '50%',
   maxWidth: 'none',
@@ -32,17 +34,36 @@ class AdminListingsMain extends Component {
       value: 'Hotel',
       IdToSearch:'',
       fetchedListing:[],
-      FlightDetails : {'flightPrice':'455','Origin':'SFO','Destination':'DAL','DepartureTime':'4:00 pm','ArrivalTime':'2:00 am',
-                        'DepartureDate':'8-19-2017','ArrivalDate':'8-20-2017','type':'nonstop','Operator':'United','FlightID':'SEO456','cabinType':'Business'},
-      CarDetails : {'carPrice':'455','CarType':'Economy','doors':'4','people':'4','bags':'2','Place':'OAK','carID':'1'},
-      HotelDetails : {'HotelID':'SO456','City':'San Jose','Name':'Hotel Indigo','Rooms':{'singleRoomPrice':'354','doubleRoomPrice':'777','suitRoomPrice':'985',},
-                      'Address':'6057 Gary Drive','State':'Texas','Ratings':'2','Availability':'yes','hotelsDateFrom':'8-20-2018','hotelsDateTo':'8-20-2018', },
+      FlightDetails:{},
+      CarDetails:{},
+      HotelDetails:{}
+
+      // FlightDetails : {'flightPrice':'455','Origin':'SFO','Destination':'DAL','DepartureTime':'4:00 pm','ArrivalTime':'2:00 am',
+      //                   'DepartureDate':'8-19-2017','ArrivalDate':'8-20-2017','type':'nonstop','Operator':'United','FlightID':'SEO456','cabinType':'Business'},
+      // CarDetails : {'carPrice':'455','CarType':'Economy','doors':'4','people':'4','bags':'2','Place':'OAK','carID':'1'},
+      // HotelDetails : {'HotelID':'SO456','City':'San Jose','Name':'Hotel Indigo','Rooms':{'singleRoomPrice':'354','doubleRoomPrice':'777','suitRoomPrice':'985',},
+      //                 'Address':'6057 Gary Drive','State':'Texas','Ratings':'2','Availability':'yes','hotelsDateFrom':'8-20-2018','hotelsDateTo':'8-20-2018', },
   };
   }
   handleOpen = () => {
    this.setState({open: true,isListingsAdd:false});
  };
-handleChange = (event, index, value) => this.setState({value});
+
+
+    componentWillMount()
+    {
+        API.getAdminSession()
+            .then((data) => {
+                //console.log(data.user);
+                if(data==401)
+                {
+                    this.props.history.push("/");
+                }
+
+            });
+
+    }
+    handleChange = (event, index, value) => this.setState({value});
  handleClose = () => {
    this.setState({open: false});
  };
@@ -55,33 +76,74 @@ handleChange = (event, index, value) => this.setState({value});
     isListingsAdd:false
   });};
   AddSearchID = (event) => {this.setState({IdToSearch: event.target.value});};
- submitIdSearch = () => {this.setState({open: false,});
- 
- if(this.state.value == "Hotel"){this.setState({hotelUpdate:true,flightUpdate:false,carUpdate:false,})}
-      if(this.state.value == "Flight"){this.setState({hotelUpdate:true,flightUpdate:true,carUpdate:false,})}
-      if(this.state.value == "Car"){this.setState({hotelUpdate:true,flightUpdate:false,carUpdate:true,})}
- 
+ submitIdSearch = () => {
+
     console.log("Type: "+this.state.value);
     console.log("ID to search: "+this.state.IdToSearch);
      var IdtoSearch = {
       'Type': this.state.value,
       'ID':this.state.IdToSearch,
-    }
+    };
     console.log(IdtoSearch);
 
-      API.CheckListingIdExists(IdtoSearch)
-          .then((status) => {
-              if (status === 204) {
-                  API.GetListingDetails(this.state.value,this.state.IdToSearch)
-                      .then((data) => {
-                          this.setState({
-                              fetchedListing: data
-                          });
+      if(this.state.value=='Flight') {
+          API.CheckListingIdExists(IdtoSearch)
+              .then((status) => {
+                  if (status == 204) {
+                      API.GetListingDetails(this.state.value, this.state.IdToSearch)
+                          .then((data) => {
+                              this.setState({
+                                  FlightDetails: data[0], open: false, isListingsUpdate: true
+                              });
 
-                          console.log(this.state.fetchedListing)
-                      });
-              }
-          });
+                              console.log(this.state.FlightDetails)
+
+                          });
+                  }
+                  else {
+                      swal("No such ID","There is no Flight listing with the provided ID", "error");
+                  }
+              });
+      }
+
+     if(this.state.value=='Car') {
+         API.CheckListingIdExists(IdtoSearch)
+             .then((status) => {
+                 if (status == 204) {
+                     API.GetListingDetails(this.state.value, this.state.IdToSearch)
+                         .then((data) => {
+                             this.setState({
+                                 CarDetails: data[0], open: false, isListingsUpdate: true
+                             });
+
+                             console.log(this.state.CarDetails)
+
+                         });
+                 }
+                 else {
+                     swal("No such ID","There is no Car listing with the provided ID", "error");
+                 }
+             });
+     }
+
+     if(this.state.value=='Hotel') {
+         API.CheckListingIdExists(IdtoSearch)
+             .then((status) => {
+                 if (status == 204) {
+                     API.GetListingDetails(this.state.value, this.state.IdToSearch)
+                         .then((data) => {
+
+                             this.setState({
+                                 HotelDetails: data[0], open: false, isListingsUpdate: true
+                             });
+
+                         });
+                 }
+                 else {
+                    swal("No such ID","There is no Hotel listing with the provided ID", "error");
+                 }
+             });
+     }
 
 };
     render() {
@@ -130,34 +192,19 @@ handleChange = (event, index, value) => this.setState({value});
               </div>
                 <TextField
                     floatingLabelText="ID"
-                    onChange={this.AddHotelID}
+                    //onChange={this.AddHotelID}
                     onChange={this.AddSearchID}/><br/>
               </Dialog>
               </div>
                 <div className="row pt-3 ">
                 {
                   this.state.isListingsUpdate
-                  ?<AdminListingsUpdate/>
+                  ?<AdminListingsUpdate  value={this.state.value} FlightDetails={this.state.FlightDetails} CarDetails={this.state.CarDetails} HotelDetails={this.state.HotelDetails}/>
                   :null
                 }
                 {
                   this.state.isListingsAdd
-                  ?<AdminListingsAdd/>
-                  :null
-                }
-                {
-                  this.state.flightUpdate
-                  ?"flight update details"
-                  :null
-                }
-                {
-                  this.state.hotelUpdate
-                  ?"hotel update details"
-                  :null
-                }
-                {
-                  this.state.carUpdate
-                  ?"car update details"
+                  ?<AdminListingsAdd />
                   :null
                 }
                 </div>

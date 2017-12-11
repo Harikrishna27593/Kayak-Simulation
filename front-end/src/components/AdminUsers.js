@@ -7,9 +7,12 @@ import TextField from 'material-ui/TextField';
 import Edit from 'material-ui/svg-icons/image/edit';
 import * as API from '../api/API';
 import Delete from 'material-ui/svg-icons/action/delete-forever';
+import Toggle from 'material-ui/Toggle';
 import Dialog from 'material-ui/Dialog';
 import FlatButton from 'material-ui/FlatButton';
-import Toggle from 'material-ui/Toggle';
+import { ValidatorForm } from 'react-form-validator-core';
+import { TextValidator} from 'react-material-ui-form-validator';
+import swal from 'sweetalert';
 const styles = {
   propContainer: {
     width: 200,
@@ -51,6 +54,32 @@ class AdminListings extends Component {
 
       };
   }
+
+
+
+    componentWillMount()
+    {
+        API.getAdminSession()
+            .then((data) => {
+                //console.log(data.user);
+                if(data==401)
+                {
+                    this.props.history.push("/");
+                }
+
+            });
+
+    }
+
+
+
+
+
+
+
+
+
+
     handleClose = () => {this.setState({open: false});};
     handleUpdate = () => {
         this.setState({open: false});
@@ -70,9 +99,9 @@ class AdminListings extends Component {
         API.AdminUserUpdate(updateDetails)
             .then((status) => {
                 if (status == 204) {
-                    alert("Successfully updated user details");
+                    swal("success","Successfully updated user details", "success");
                 } else if (status == 401) {
-                    alert("updation failed user details");
+                    swal("invalid","User Updation Failed", "error");
                 }
             });
     };
@@ -86,7 +115,7 @@ class AdminListings extends Component {
     EditUser = (userToEdit) => {
         console.log("Edit: "+userToEdit);
         this.setState({open: true});
-        API.getUserDetails(userToEdit,'','').
+        API.getUserDetails(userToEdit,'','',1).
         then((data)=>{
               console.log(data)
             this.setState({
@@ -110,11 +139,11 @@ class AdminListings extends Component {
         API.AdminUserDelete(res)
             .then((status) => {
                 if (status === 204) {
-                    alert('delete success')
+                    swal("success","Successfully Deleted User", "success");
                 }
 
                 else {
-                    alert('delete failed')
+                    swal("invalid","User Deletion Failed", "error");
                 }
     }
             )};
@@ -152,7 +181,7 @@ class AdminListings extends Component {
         API.AdminUserCheck(res)
             .then((status) => {
                 if (status === 204) {
-        API.getUserDetails(this.state.username,this.state.firstname,this.state.lastname).
+        API.getUserDetails(this.state.username,this.state.firstname,this.state.lastname,0).
         then((data)=>{
             this.setState({
                 users: data
@@ -161,7 +190,7 @@ class AdminListings extends Component {
         });
     }
     else {
-                  alert('error')  //error message here
+                    swal("invalid","User May not exist.Please try again", "error");
                 }
             });
 

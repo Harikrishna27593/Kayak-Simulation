@@ -28,6 +28,21 @@ class AdminHome extends Component {
       document.title = `Admin - Home`;
   }
 
+    // componentWillMount()
+    // {
+    //     API.getAdminSession()
+    //         .then((data) => {
+    //             //console.log(data.user);
+    //             if(data==401)
+    //             {
+    //                 this.props.history.push("/");
+    //             }
+    //
+    //         });
+    //
+    // }
+
+
   handleOpen = () => {this.setState({
     open: true,
   });};
@@ -88,14 +103,14 @@ class AdminHome extends Component {
                 <h1 className="display-1">Hello, Admin!</h1>
                 <p className="lead">Click the icon on the left for more options.</p>
                 <hr className="my-4"></hr>
-                <p className="lead">
+                <p className="lead"></p>
                 <RaisedButton className="mt-4"
                 label = "Add Another Admin"
                 labelColor ={fullWhite}
                 backgroundColor={cyan500}
                 onClick={this.handleOpen}
                 />
-                </p>
+
               </div>
               <Dialog
                 title="Enter the Details"

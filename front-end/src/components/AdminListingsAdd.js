@@ -17,7 +17,11 @@ import MenuItem from 'material-ui/MenuItem';
 import TimePicker from 'material-ui/TimePicker';
 import RaisedButton from 'material-ui/RaisedButton';
 import * as API from '../api/API';
-
+import swal from 'sweetalert';
+import validator from 'validator';
+import AutoComplete from 'material-ui/AutoComplete';
+const states = ["Alaska", "Alabama", "Arkansas", "American Samoa", "Arizona", "California", "Colorado", "Connecticut", "District of Columbia", "Delaware", "Florida", "Georgia", "Guam", "Hawaii", "Iowa", "Idaho", "Illinois", "Indiana", "Kansas", "Kentucky", "Louisiana", "Massachusetts", "Maryland", "Maine", "Michigan", "Minnesota", "Missouri", "Mississippi", "Montana", "North Carolina", "North Dakota", "Nebraska", "New Hampshire", "New Jersey", "New Mexico", "Nevada", "New York", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Puerto Rico", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Virginia", "Virgin Islands", "Vermont", "Washington", "Wisconsin", "West Virginia", "Wyoming"];
+const today = new Date();
 
 const styles = {
   marginLeft: 20,
@@ -47,31 +51,60 @@ class HomePageSearchTabs extends Component {
     super(props);
     this.state = {
       value: 'Hotels',
-      HotelId:0,
+      HotelId:'',
       HotelName:'',
       HotelAddress:'',
       HotelCity:'',
       HotelState:'',
-      HotelPrice:0,
-      FlightId:0,
+      HotelPrice:'',
+      errHotelId:'',
+      errHotelName:'',
+      errHotelAddress:'',
+      errHotelCity:'',
+      errHotelState:'',
+      errHotelPrice:'',
+      FlightId:'',
       FilghtOperator :'',
-        FilghtDepDate:null,
-        FilghtArrDate:null,
-      FilghtDepTime :null,
-      FilghtArrTime :null,
+      FlightDateDep:'',
+      FlightDateArr:'',
+      FilghtDepTime :'',
+      FilghtArrTime :'',
+      FilghtEconomy:'',
+      FilghtBusiness:'',
+      FilghtFirstClass:'',
+      errFilghtEconomy:'',
+      errFilghtBusiness:'',
+      errFilghtFirstClass:'',
+      FlightStops:'1 stop',
       FLightOrigin :'',
       FLightDest:'',
-      FlightPrice:0,
+      errFlightId:'',
+      errFilghtOperator :'',
+      errFilghtDepTime :'',
+      errFilghtArrTime :'',
+      errFilghtDepDate :'',
+      errFilghtArrDate :'',
+      errFLightOrigin :'',
+      errFLightDest:'',
       CarId:'',
       CarType: 'Compact',
       CarPlace:'',
       carsDatePickUp:'',
       carsDateDropOff:'',
-      CarPrice:'0',
+      CarPrice:'',
       CarPeople:'1',
       CarDoors:'1',
       CarBags:'1',
-
+      errCarId:'',
+      errCarPlace:'',
+      errcarsDatePickUp:'',
+      errcarsDateDropOff:'',
+      errCarPrice:null,
+        singleRoomPrice:'',
+        doubleRoomPrice:'',
+        suitRoomPrice:'',
+        HotelsDateFrom:'',
+        HotelsDateTo:''
     };
   }
   handleChangeTab = (value) => {this.setState({ value: value,});
@@ -80,27 +113,61 @@ class HomePageSearchTabs extends Component {
   AddHotelName = (event) => {this.setState({HotelName: event.target.value});};
   AddHotelAddress = (event) => {this.setState({HotelAddress: event.target.value});};
   AddHotelCity = (event) => {this.setState({HotelCity: event.target.value});};
-  AddHotelState = (event) => {this.setState({HotelState: event.target.value});};
-  AddHotelPrice = (event) => {this.setState({HotelPrice: event.target.value});};
-  addHotelListing = () => {
+  AddHotelState = (value) => {this.setState({HotelState: value});};
+    AddHotelPrice = (event) => {this.setState({singleRoomPrice: event.target.value});};
+    AddDoublePrice = (event) => {this.setState({doubleRoomPrice: event.target.value});};
+    AddSuitPrice = (event) => {this.setState({suitRoomPrice: event.target.value});};
+    AddHotelsDateFrom=(event,date)=>{this.setState({HotelsDateFrom: date});};
+    AddHotelsDateTo=(event,date)=>{this.setState({HotelsDateTo: date});};
+
+    addHotelListing = () => {
     var hotelDetails={
       HotelId:this.state.HotelId,
       HotelName:this.state.HotelName,
       HotelAddress:this.state.HotelAddress,
       HotelCity:this.state.HotelCity,
       HotelState:this.state.HotelState,
-      HotelPrice:this.state.HotelPrice,
+        singleRoomPrice:this.state.singleRoomPrice,
+        doubleRoomPrice:this.state.doubleRoomPrice,
+        suitRoomPrice:this.state.suitRoomPrice,
+        HotelsDateFrom:this.state.HotelsDateFrom,
+        HotelsDateTo:this.state.HotelsDateTo
     };
-      API.addHotelListing(hotelDetails).
-      then((status1) =>{
-          if(status1===201)
-              alert("Succesfully Added to the hotel");
-      });
     console.log(hotelDetails);
+  if(this.state.HotelState==='' || this.state.HotelId ==='' || this.state.HotelName ==='' || this.state.HotelAddress ===''
+          || this.state.HotelCity ==='' || this.state.HotelPrice ===''
+      ) {
+      if(this.state.HotelId ==''){this.setState({errHotelId:"This field is required" });}
+      if(this.state.HotelName ==''){this.setState({errHotelName:"This field is required" });}
+      if(this.state.HotelAddress ==''){this.setState({errHotelAddress:"This field is required" });}
+      if(this.state.HotelCity ==''){this.setState({errHotelCity:"This field is required" });}
+      if(this.state.HotelState ==''){this.setState({errHotelState:"This field is required" });}
+        if(this.state.singleRoomPrice ==''){this.setState({errHotelState:"This field is required" });}
+        if(this.state.doubleRoomPrice ==''){this.setState({errHotelState:"This field is required" });}
+        if(this.state.suitRoomPrice ==''){this.setState({errHotelState:"This field is required" });}
+        swal("Required","Please enter all the values!", "error");
+      }
+        else if(!validator.isAlpha(this.state.HotelName)){
+        swal("invalid","Please enter valid Hotel Name!", "error");
+      }
+      else if(!validator.isAlpha(this.state.HotelCity)){
+        swal("invalid","Please enter valid City!", "error");
+      }
+      else if(!states.includes(this.state.HotelState)) {
+      swal("invalid", "Please enter valid State!", "error");
+  }
+     else{
+          API.addHotelListing(hotelDetails).then((status1) => {
+              if (status1 === 201){
+                  swal("success","Hotel Listing has been successfully added", "success");
+                }
+              else{
+                  swal("Fail","Hotel Listing already exists", "error");
+                }
+          });
+          console.log(hotelDetails);
+      }
   };
-
-
-
 
   AddFlightId = (event) => {this.setState({FlightId: event.target.value});};
   AddFilghtOperator = (event) => {this.setState({FilghtOperator : event.target.value});};
@@ -109,27 +176,67 @@ class HomePageSearchTabs extends Component {
   AddFLightOrigin = (event) => {this.setState({FLightOrigin: event.target.value});};
   AddFLightDest = (event) => {this.setState({FLightDest: event.target.value});};
   AddFlightPrice = (event) => {this.setState({FlightPrice: event.target.value});};
+  AddFilghtEconomy = (event) => {this.setState({FilghtEconomy: event.target.value});};
+  AddFilghtBusiness = (event) => {this.setState({FilghtBusiness: event.target.value});};
+  AddFilghtFirstClass = (event) => {this.setState({FilghtFirstClass: event.target.value});};
+  handleFlightStops = (event, index, FlightStops) => {
+    this.setState({FlightStops});
+  };
+  handleFlightsDateDep = (event, date) => {
+    this.setState({FlightDateDep: date,
+  });
+};
+  handleFlightsDateArr = (event, date) => {this.setState({FlightDateArr: date});};
   addFlightListing = () => {
     var FlightDetails={
       FlightId:this.state.FlightId,
       FilghtOperator:this.state.FilghtOperator,
-        FilghtDepDate:this.state.FilghtDepDate,
-        FilghtArrDate:this.state.FilghtArrDate,
       FilghtDepTime:this.state.FilghtDepTime,
       FilghtArrTime:this.state.FilghtArrTime,
       FLightOrigin:this.state.FLightOrigin,
       FLightDest:this.state.FLightDest,
-      FlightPrice:this.state.FlightPrice,
+      FlightDateDep:this.state.FlightDateDep,
+      FlightDateArr:this.state.FlightDateArr,
+      FilghtEconomy:this.state.FilghtEconomy,
+      FilghtBusiness:this.state.FilghtBusiness,
+      FilghtFirstClass:this.state.FilghtFirstClass,
+      FlightStops:this.state.FlightStops,
     }
     console.log(FlightDetails);
-
+   if(this.state.FlightId === '' || this.state.FilghtOperator === '' || this.state.FilghtDepTime === '' || this.state.FilghtArrTime === '' || this.state.FlightDateDep === '' || this.state.FlightDateArr === '' ||this.state.FLightOrigin === '' || this.state.FLightDest === '' || this.state.FilghtEconomy === '' || this.state.FilghtBusiness === '' || this.state.FilghtFirstClass === '' ){
+      if(this.state.FlightId ==''){this.setState({errFlightId:"This field is required" });}
+       if(this.state.FilghtOperator ==''){this.setState({errFilghtOperator:"This field is required" });}
+       if(this.state.FilghtDepTime ==''){this.setState({errFilghtDepTime:"This field is required" });}
+       if(this.state.FilghtArrTime ==''){this.setState({errFilghtArrTime:"This field is required" });}
+       if(this.state.FlightDateDep ==''){this.setState({errFilghtDepDate:"This field is required" });}
+       if(this.state.FlightDateArr ==''){this.setState({errFilghtArrDate:"This field is required" });}
+       if(this.state.FLightOrigin ==''){this.setState({errFLightOrigin:"This field is required" });}
+       if(this.state.FLightDest ==''){this.setState({errFLightDest:"This field is required" });}
+       if(this.state.FilghtEconomy ==''){this.setState({errFilghtEconomy:"This field is required" });}
+       if(this.state.FilghtBusiness ==''){this.setState({errFilghtBusiness:"This field is required" });}
+       if(this.state.FilghtFirstClass ==''){this.setState({errFilghtFirstClass:"This field is required" });}
+      swal("Required","Please enter all the values!", "error");
+    }
+    else if(!validator.isAlpha(this.state.FilghtOperator)){
+      swal("invalid","Please enter valid Operator!", "error");
+    }
+    else if(!validator.isAlpha(this.state.FLightOrigin)){
+      swal("invalid","Please enter valid Origin!", "error");
+    }
+    else if(!validator.isAlpha(this.state.FLightDest)){
+      swal("invalid","Please enter valid Destination!", "error");
+    }
+    else{
       API.AddFlightListing(FlightDetails)
           .then((status) => {
-              if (status ==204) {
-                  alert("FLIGHT");
+              if (status == 204) {
+                  swal("success","Flight Listing has been successfully added", "success");
+              }
+              else{
+                swal("Fail","Flight Listing already exists", "error");
               }
           });
-
+    }
 
   };
   
@@ -154,26 +261,56 @@ class HomePageSearchTabs extends Component {
       CarDoors:this.state.CarDoors,
       CarBags:this.state.CarBags,
 
-    }
+    };
     console.log(CarDetails);
+
+
+if(this.state.CarId==='' || this.state.CarPlace ==='' || this.state.CarPrice ==='' || this.state.carsDatePickUp ===''
+        || this.state.carsDateDropOff ===''
+    ) {
+      if(this.state.CarId ==''){this.setState({errCarId:"This field is required" });}
+      if(this.state.CarPlace ==''){this.setState({errCarPlace:"This field is required" });}
+      if(this.state.CarPrice ==''){this.setState({errCarPrice:"This field is required" });}
+      if(this.state.carsDatePickUp ==''){this.setState({errcarsDatePickUp:"This field is required" });}
+      if(this.state.carsDateDropOff ==''){this.setState({errcarsDateDropOff:"This field is required" });}
+      swal("Required","Please enter all the values!", "error");
+    }
+    else if(!validator.isAlpha(this.state.CarPlace)){
+      swal("invalid","Please enter valid Place!", "error");
+    }
+    else{
       API.AddCarListing(CarDetails)
           .then((status) => {
               if (status ==204) {
-                  alert("FLIGHT");
+                  swal("success","Car Listing has been successfully added", "success");
+              }
+              else {
+                  swal("Fail","Car Listing already exists", "error");
               }
           });
+        }
   };
   
   componentWillMount(){
     this.setState({
       HotelPrice: this.state.HotelPrice,
     });
+
+          API.getAdminSession()
+              .then((data) => {
+                  //console.log(data.user);
+                  if(data==401)
+                  {
+                      this.props.history.push("/");
+                  }
+
+              });
     }
 
     render() {
         return (
-            <div className="container-fluid">
-             <Tabs style={{backgroundColor:'#E9ECEF'}}
+            <div className="container-fluid ">
+            <Tabs style={{backgroundColor:'#E9ECEF'}}
             styles={color}
               value={this.state.value}
               onChange={this.handleChangeTab}>
@@ -182,23 +319,53 @@ class HomePageSearchTabs extends Component {
                         <Paper zDepth={1}>
                         <TextField className="mr-4 m1-4"
                             floatingLabelText="ID"
+                            errorText={this.state.errHotelId}
                             onChange={this.AddHotelId}/>
                         <TextField className="mr-4 m1-4"
                             floatingLabelText="Name"
+                            errorText={this.state.errHotelName}
                             onChange={this.AddHotelName}/>
                         <TextField className="mr-4 m1-4"
                             floatingLabelText="Address"
+                            errorText={this.state.errHotelAddress}
                             onChange={this.AddHotelAddress}/>
                         <TextField className="mr-4 m1-4"
                             floatingLabelText="City"
+                            errorText={this.state.errHotelCity}
                             onChange={this.AddHotelCity}/>
+                       <AutoComplete
+                            floatingLabelText={"State"}
+                            filter={AutoComplete.fuzzyFilter}
+                            value={this.state.HotelState}
+                            onUpdateInput={this.AddHotelState}
+                            errorText={this.state.errHotelState}
+                            dataSource={states}
+                            fullWidth={false}
+                            maxSearchResults={10}
+                          />
                         <TextField className="mr-4 m1-4"
-                            floatingLabelText="State"
-                            onChange={this.AddHotelState}/>
-                        <TextField className="mr-4 m1-4"
-                            floatingLabelText="Price in $"
+                            floatingLabelText="SingleRoomPrice in $"
                             type="number"
+                            errorText={this.state.errHotelPrice}
                             onChange={this.AddHotelPrice}/>
+                            <TextField className="mr-4 m1-4"
+                                       floatingLabelText="DoubleRoomPrice in $"
+                                       type="number"
+                                       errorText={this.state.errHotelPrice}
+                                       onChange={this.AddDoublePrice}/>
+                            <TextField className="mr-4 m1-4"
+                                       floatingLabelText="SuitRoomPrice in $"
+                                       type="number"
+                                       errorText={this.state.errHotelPrice}
+                                       onChange={this.AddSuitPrice}/>
+                            <DatePicker className="ml-3"
+                                        hintText="HotelsDateFrom"
+                                        value={this.state.HotelsDateFrom}
+                                        onChange={this.AddHotelsDateFrom}/>
+                            <DatePicker className="ml-3"
+                                        hintText="HotelsDateTo"
+                                        value={this.state.HotelsDateTo}
+                                        onChange={this.AddHotelsDateTo}/>
                         <Divider/>
                         <RaisedButton className="m-4"
                         label = "Add Listing"
@@ -214,32 +381,69 @@ class HomePageSearchTabs extends Component {
                       <Paper zDepth={1}>
                       <TextField className="mr-4 m1-4"
                           floatingLabelText="ID"
+                          errorText={this.state.errFlightId}
                           onChange={this.AddFlightId}/>
                       <TextField className="mr-4 m1-4"
                           floatingLabelText="Operator"
+                          errorText={this.state.errFilghtOperator}
                           onChange={this.AddFilghtOperator}/>
+                      <DatePicker style={styles}
+                        hintText="Departure Date"
+                        value={this.state.FlightDateDep}
+                        onChange={this.handleFlightsDateDep}
+                        errorText={this.state.errFilghtDepDate}
+                        minDate={today}
+                      />
+                      <DatePicker style={styles}
+                        hintText="Arrival Date"
+                        value={this.state.FlightDateArr}
+                        onChange={this.handleFlightsDateArr}
+                        minDate={this.state.FlightDateDep}
+                        errorText={this.state.errFilghtDepDate}
+                      />
+                      <label>Number of Stops:</label>
+                      <DropDownMenu value={this.state.FlightStops} onChange={this.handleFlightStops}>
+                        <MenuItem value={'1 stop'} primaryText="1 stop" />
+                        <MenuItem value={'2 stops'} primaryText="2 stops" />
+                        <MenuItem value={'3 stops'} primaryText="3 stops" />
+                      </DropDownMenu>
+                      <TextField className="mr-4 m1-4"
+                          floatingLabelText="Economy Price in $"
+                           type="number"
+                          errorText={this.state.errFilghtEconomy}
+                          onChange={this.AddFilghtEconomy}/>
+                      <TextField className="mr-4 m1-4"
+                          floatingLabelText="Business Price in $"
+                          type="number"
+                          errorText={this.state.errFilghtBusiness}
+                          onChange={this.AddFilghtBusiness}/>
+                      <TextField className="mr-4 m1-4"
+                          floatingLabelText="First Class Price in $"
+                          errorText={this.state.errFilghtFirstClass}
+                          type="number"
+                          onChange={this.AddFilghtFirstClass}/>
                       <TimePicker
                         format="ampm"
                         hintText="Departure Time"
+                        errorText={this.state.errFilghtDepTime}
                         value={this.state.FilghtDepTime}
                         onChange={this.AddFilghtDepTime}
                       />
                       <TimePicker
                         format="ampm"
                         hintText="Arrival Time"
+                        errorText={this.state.errFilghtArrTime}
                         value={this.state.FilghtArrTime}
                         onChange={this.AddFilghtArrTime}
                       />
                       <TextField className="mr-4 m1-4"
                           floatingLabelText="Origin"
+                          errorText={this.state.errFLightOrigin}
                           onChange={this.AddFLightOrigin}/>
                       <TextField className="mr-4 m1-4"
                           floatingLabelText="Destination"
+                          errorText={this.state.errFLightDest}
                           onChange={this.AddFLightDest}/>
-                      <TextField className="mr-4 m1-4"
-                          floatingLabelText="Price in $"
-                          type="number"
-                          onChange={this.AddFlightPrice}/>
                       <Divider/>
                       <RaisedButton className="m-4"
                       label = "Add Listing"
@@ -255,6 +459,7 @@ class HomePageSearchTabs extends Component {
                       <Paper zDepth={1}>
                       <TextField className="ml-3"
                           floatingLabelText="ID"
+                          errorText={this.state.errCarId}
                           onChange={this.AddCarId}/>
                       <label>Car Type:</label>
                       <DropDownMenu className="mt-3 ml-3" value={this.state.CarType} onChange={this.handleCarType}>
@@ -264,18 +469,22 @@ class HomePageSearchTabs extends Component {
                       </DropDownMenu>
                       <TextField className="ml-3"
                           floatingLabelText="Place"
+                          errorText={this.state.errCarPlace}
                           onChange={this.AddCarPlace}/>
                       <DatePicker className="ml-3"
-                        hintText="pick-up on"
+                        hintText={"pick-upon"}
                         value={this.state.carsDatePickUp}
+                        errorText={this.state.errcarsDatePickUp}
                         onChange={this.handleChangeCarsDatePickUp}/>
                       <DatePicker className="ml-3"
                         hintText="drop-off on"
                         value={this.state.carsDateDropOff}
+                        errorText={this.state.errcarsDateDropOff}
                         onChange={this.handleChangeCarsDateDropOff}/>
                       <TextField className="ml-3"
                           floatingLabelText="Price in $"
                           type="number"
+                          errorText={this.state.errCarPrice}
                           onChange={this.AddCarPrice}/>
                       <div>
                         <label className="ml-3">People:</label>
